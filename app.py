@@ -1,7 +1,6 @@
 import requests
 import serial
 import streamlit as st
-import streamlit.components.v1 as components
 import time
 
 # পৃষ্ঠা কনফিগারেশন
@@ -58,7 +57,7 @@ if not st.session_state.loaded:
         }, 2200);
     </script>
     """
-  components.html(splash_html, height=0)
+  st.components.v1.html(splash_html, height=0)
   st.session_state.loaded = True
 
 # 🌟 ডায়নামিক হেলথ ব্যাকগ্রাউন্ড এবং কাস্টম স্টাইল CSS
@@ -102,7 +101,7 @@ if "chat_histories" not in st.session_state:
 GROQ_API_KEY = "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"
 
 
-# 🌟 পূর্ণাঙ্গ চ্যাট হিস্ট্রি সহ Groq AI কল ফাংশন (স্মৃতিশক্তি বজায় রাখার জন্য)
+# 🌟 পূর্ণাঙ্গ চ্যাট হিস্ট্রি এবং কঠোর বাংলা স্ক্রিপ্ট সহ Groq AI কল ফাংশন
 def call_groq_ai(chat_history):
   if not GROQ_API_KEY:
     return "দুঃখিত, এআই সিস্টেম কনফিগার করা হয়নি।"
@@ -112,18 +111,19 @@ def call_groq_ai(chat_history):
       "Content-Type": "application/json",
   }
 
-  # সিস্টেম প্রম্পট এবং পূর্ববর্তী সব মেসেজ যুক্ত করা
   messages = [{
       "role": "system",
       "content": (
           "You are a professional, knowledgeable, and empathetic medical"
           " assistant named 'MUSHFIK'S HEALTH ASSISTANT AI' for a school science"
-          " fair project in Bangladesh. Answer the user's questions in natural,"
-          " grammatically correct, and polite Bengali. Give detailed, accurate,"
-          " and helpful medical guidance or general information related to"
-          " their query. Always remember and track the context of previous"
-          " messages in the conversation history. NEVER include emergency"
-          " hospital phone numbers or helplines unless specifically asked."
+          " fair project in Bangladesh. CRITICAL RULE: No matter what language"
+          " or script the user writes in (including English or Banglish /"
+          " phonetic Bengali), you MUST ALWAYS reply strictly in proper, correct"
+          " and formal Bengali script (বাংলা হরফে). Give detailed, accurate,"
+          " and helpful medical guidance related to their query. Always"
+          " remember and track the context of previous messages in the"
+          " conversation history. NEVER include emergency hospital phone"
+          " numbers or helplines unless specifically asked."
       ),
   }]
 
@@ -143,31 +143,6 @@ def call_groq_ai(chat_history):
       return "এআই সার্ভার রেসপন্স করছে না। একটু পরে চেষ্টা করুন।"
   except Exception as e:
     return f"কানেকশন সমস্যা: {str(e)}"
-
-
-# ব্রাউজারের মাধ্যমে পড়ে শোনানোর ফাংশন
-def speak_response(text):
-  clean_text = (
-      text.replace("\n", " ")
-      .replace('"', "'")
-      .replace("`", "")
-      .replace("*", "")
-  )
-  html_code = f"""
-    <script>
-        function playSpeech() {{
-            if ('speechSynthesis' in window) {{
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance("{clean_text}");
-                utterance.lang = 'bn-BD';
-                utterance.rate = 0.95;
-                window.speechSynthesis.speak(utterance);
-            }}
-        }}
-        playSpeech();
-    </script>
-    """
-  components.html(html_code, height=0)
 
 
 # ----------------- সাইডবারের লগইন / সাইন-আপ প্যানেল -----------------
@@ -278,7 +253,6 @@ if arduino_connected:
     st.subheader("🤖 AI স্বাস্থ্য বিশ্লেষণ")
     if st.button("📈 ডেটা এআই দ্বারা বিশ্লেষণ করুন"):
       with st.spinner("AI স্বাস্থ্য রিপোর্ট তৈরি করছে..."):
-        # সেন্সর ডেটা বিশ্লেষণের জন্য হিস্ট্রি বা প্রম্পট পাঠানো
         sensor_prompt = f"রোগীর তাপমাত্রা: {temp} °F, মান ২: {heart_rate}, SpO2: {spo2}%। বাংলায় একটি বিস্তারিত স্বাস্থ্য রিপোর্ট তৈরি করুন।"
         temp_history = st.session_state.chat_histories[current_user] + [{
             "role": "user",
@@ -286,7 +260,6 @@ if arduino_connected:
         }]
         response = call_groq_ai(temp_history)
         st.write(response)
-        speak_response(response)
   if ser:
     ser.close()
 else:
@@ -301,7 +274,6 @@ else:
       st.markdown(message["content"])
 
   if prompt := st.chat_input("আপনার স্বাস্থ্যগত সমস্যা বাংলায় লিখুন..."):
-    # ইউজারের মেসেজ স্ক্রিনে দেখানো এবং হিস্টরিতে যোগ করা
     with st.chat_message("user"):
       st.markdown(prompt)
     st.session_state.chat_histories[current_user].append(
@@ -309,12 +281,10 @@ else:
     )
 
     with st.spinner("AI উত্তর ভাবছে..."):
-      # এখন পুরো চ্যাট হিস্ট্রি এআই-এর কাছে পাঠানো হচ্ছে যাতে সে আগের সব কথা মনে রাখে
       response = call_groq_ai(st.session_state.chat_histories[current_user])
 
     with st.chat_message("assistant"):
       st.markdown(response)
-      speak_response(response)
 
     st.session_state.chat_histories[current_user].append(
         {"role": "assistant", "content": response}
