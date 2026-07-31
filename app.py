@@ -9,11 +9,89 @@ st.set_page_config(
     page_title="MUSHFIK'S HEALTH ASSISTANT AI", page_icon="🩺", layout="wide"
 )
 
+# 🌟 ওপেনিং অ্যানিমেশন বা স্প্ল্যাশ স্ক্রিন (শুধুমাত্র প্রথমবার লোড হওয়ার সময় দেখাবে)
+if "loaded" not in st.session_state:
+  st.session_state.loaded = False
+
+if not st.session_state.loaded:
+  splash_html = """
+    <div id="splash-screen" style="
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a365d);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 999999;
+        color: white;
+        font-family: sans-serif;
+        transition: opacity 0.8s ease;
+    ">
+        <div style="font-size: 60px; animation: pulse 1.2s infinite ease-in-out;">🩺</div>
+        <h1 style="margin-top: 20px; letter-spacing: 2px; color: #ffffff; text-align: center;">MUSHFIK'S HEALTH ASSISTANT AI</h1>
+        <p style="color: #00ffcc; font-size: 18px; margin-top: 10px; font-weight: bold;">সিস্টেম লোড হচ্ছে, একটু অপেক্ষা করুন...</p>
+    </div>
+    
+    <style>
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    @keyframes pulse {
+        0% { transform: scale(0.9); opacity: 0.7; }
+        50% { transform: scale(1.15); opacity: 1; }
+        100% { transform: scale(0.9); opacity: 0.7; }
+    }
+    </style>
+    
+    <script>
+        setTimeout(function() {
+            var splash = document.getElementById('splash-screen');
+            if(splash) {
+                splash.style.opacity = '0';
+                setTimeout(function() { splash.style.display = 'none'; }, 800);
+            }
+        }, 2200);
+    </script>
+    """
+  components.html(splash_html, height=0)
+  st.session_state.loaded = True
+
+# 🌟 ডায়নামিক হেলথ ব্যাকগ্রাউন্ড এবং কাস্টম স্টাইল CSS
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a365d);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite;
+    }
+    
+    @keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    h1, h2, h3, h4, h5, h6, p, label {
+        color: #ffffff !important;
+    }
+    
+    [data-testid="stSidebar"] {
+        background-color: rgba(15, 32, 39, 0.9) !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 # সেশন স্টেট ইনিশিয়ালাইজেশন
 if "users" not in st.session_state:
-  st.session_state.users = {
-      "mushfik": "1234"
-  }  # ডিফল্ট টেস্ট একাউন্ট (ইউজারনেম: mushfik, পাসওয়ার্ড: 1234)
+  st.session_state.users = {"mushfik": "1234"}
 if "logged_in" not in st.session_state:
   st.session_state.logged_in = False
 if "current_user" not in st.session_state:
@@ -68,7 +146,7 @@ def speak_response(text):
   clean_text = (
       text.replace("\n", " ")
       .replace('"', "'")
-      .replace("`", "__")
+      .replace("`", "")
       .replace("*", "")
   )
   html_code = f"""
@@ -88,7 +166,7 @@ def speak_response(text):
   components.html(html_code, height=0)
 
 
-# ----------------- সাইডবারের একদম উপরে লগইন / সাইন-আপ প্যানেল -----------------
+# ----------------- সাইডবারের লগইন / সাইন-আপ প্যানেল -----------------
 st.sidebar.title("👤 ইউজার অ্যাকাউন্ট")
 
 if not st.session_state.logged_in:
@@ -130,14 +208,9 @@ if not st.session_state.logged_in:
             st.rerun()
         else:
           st.error("সবগুলো ঘর পূরণ করুন!")
-  st.sidebar.info(
-      "💡 আপনি বর্তমানে **Guest** হিসেবে ব্যবহার করছেন। হিস্ট্রি সেভ রাখতে"
-      " লগইন করতে পারেন।"
-  )
+  st.sidebar.info("💡 বর্তমানে Guest মোডে আছেন। হিস্ট্রি সেভ রাখতে লগইন করুন।")
 else:
-  st.sidebar.success(
-      f"активных: **{st.session_state.current_user}** (লগইন করা)"
-  )
+  st.sidebar.success(f"👤 ইউজার: **{st.session_state.current_user}**")
   if st.sidebar.button("🚪 লগআউট", use_container_width=True):
     st.session_state.logged_in = False
     st.session_state.current_user = "Guest"
@@ -174,11 +247,11 @@ if arduino_connected:
   st.success("✅ সেন্সর বুথ সংযুক্ত আছে! (সেন্সর মোড সক্রিয়)")
   col1, col2 = st.columns([1, 2])
   with col1:
-    st.subheader("📊 লাইভ সেন্সর ডেটা")
+    st.subheader("📊 লাইভ সেন্সর ডেটা (DHT11/Sensor)")
     demo_mode = st.checkbox("ডেমো বা টেস্ট ডেটা ব্যবহার করুন", value=True)
     if demo_mode:
-      temp = st.slider("শরীরের তাপমাত্রা (°F)", 96.0, 105.0, 98.6, 0.1)
-      heart_rate = st.slider("হৃদস্পন্দন (BPM)", 50, 150, 75)
+      temp = st.slider("শরীরের/রুমের তাপমাত্রা (°F)", 96.0, 105.0, 98.6, 0.1)
+      heart_rate = st.slider("হৃদস্পন্দন / আর্দ্রতা", 50, 150, 75)
       spo2 = st.slider("অক্সিজেন মাত্রা (SpO2 %)", 80, 100, 98)
     else:
       temp, heart_rate, spo2 = 98.6, 75, 98
@@ -189,19 +262,19 @@ if arduino_connected:
           if len(parts) == 3:
             temp, heart_rate, spo2 = (
                 float(parts[0]),
-                int(parts[1]),
-                int(parts[2]),
+                float(parts[1]),
+                float(parts[2]),
             )
         except:
           pass
       st.metric(label="🌡️ তাপমাত্রা", value=f"{temp} °F")
-      st.metric(label="💓 হার্ট রেট", value=f"{heart_rate} BPM")
+      st.metric(label="💓 হার্ট রেট/আর্দ্রতা", value=f"{heart_rate}")
       st.metric(label="🩸 SpO2", value=f"{spo2} %")
   with col2:
     st.subheader("🤖 AI স্বাস্থ্য বিশ্লেষণ")
     if st.button("📈 ডেটা এআই দ্বারা বিশ্লেষণ করুন"):
       with st.spinner("AI স্বাস্থ্য রিপোর্ট তৈরি করছে..."):
-        prompt = f"একজন অভিজ্ঞ প্রবীণ ডাক্তারের মতো আচরণ করুন। রোগীর তাপমাত্রা: {temp} °F, হার্ট রেট: {heart_rate} bpm, SpO2: {spo2}%। বাংলায় একটি বিস্তারিত স্বাস্থ্য রিপোর্ট তৈরি করুন।"
+        prompt = f"একজন অভিজ্ঞ প্রবীণ ডাক্তারের মতো আচরণ করুন। রোগীর তাপমাত্রা: {temp} °F, মান ২: {heart_rate}, SpO2: {spo2}%। বাংলায় একটি বিস্তারিত স্বাস্থ্য রিপোর্ট তৈরি করুন।"
         response = call_groq_ai(prompt)
         st.write(response)
         speak_response(response)
