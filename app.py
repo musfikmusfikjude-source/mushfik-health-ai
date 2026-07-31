@@ -9,7 +9,7 @@ st.set_page_config(
     page_title="MUSHFIK'S HEALTH ASSISTANT AI", page_icon="🩺", layout="wide"
 )
 
-# সেশন স্টেট ইনিশিয়ালাইজেশন (ইউজার ও চ্যাট হিস্ট্রির জন্য)
+# সেশন স্টেট ইনিশিয়ালাইজেশন
 if "users" not in st.session_state:
   st.session_state.users = {
       "mushfik": "1234"
@@ -17,9 +17,9 @@ if "users" not in st.session_state:
 if "logged_in" not in st.session_state:
   st.session_state.logged_in = False
 if "current_user" not in st.session_state:
-  st.session_state.current_user = ""
+  st.session_state.current_user = "Guest"
 if "chat_histories" not in st.session_state:
-  st.session_state.chat_histories = {}
+  st.session_state.chat_histories = {"Guest": []}
 
 GROQ_API_KEY = "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"
 
@@ -68,7 +68,7 @@ def speak_response(text):
   clean_text = (
       text.replace("\n", " ")
       .replace('"', "'")
-      .replace("`", "")
+      .replace("`", "__")
       .replace("*", "")
   )
   html_code = f"""
@@ -88,75 +88,71 @@ def speak_response(text):
   components.html(html_code, height=0)
 
 
-# ----------------- লগইন ও সাইন-আপ পেজ -----------------
+# ----------------- সাইডবারের একদম উপরে লগইন / সাইন-আপ প্যানেল -----------------
+st.sidebar.title("👤 ইউজার অ্যাকাউন্ট")
+
 if not st.session_state.logged_in:
-  st.title("🩺 MUSHFIK'S HEALTH ASSISTANT AI - Portal")
-  st.write("প্রবেশ করতে আপনার একাউন্টে লগইন করুন অথবা নতুন একাউন্ট তৈরি করুন।")
+  with st.sidebar.expander("🔑 লগইন বা সাইন-আপ করুন", expanded=False):
+    auth_tab1, auth_tab2 = st.tabs(["লগইন", "সাইন-আপ"])
 
-  tab1, tab2 = st.tabs(["🔑 লগইন (Login)", "📝 একাউন্ট তৈরি (Sign Up)"])
-
-  with tab1:
-    st.subheader("লগইন ফর্ম")
-    l_user = st.text_input("ইউজারনেম (Username)", key="l_user")
-    l_pass = st.text_input(
-        "পাসওয়ার্ড (Password)", type="password", key="l_pass"
-    )
-    if st.button("লগইন করুন", use_container_width=True):
-      if (
-          l_user in st.session_state.users
-          and st.session_state.users[l_user] == l_pass
-      ):
-        st.session_state.logged_in = True
-        st.session_state.current_user = l_user
-        if l_user not in st.session_state.chat_histories:
-          st.session_state.chat_histories[l_user] = []
-        st.success("সফলভাবে লগইন হয়েছে!")
-        time.sleep(1)
-        st.rerun()
-      else:
-        st.error("ভুল ইউজারনেম বা পাসওয়ার্ড!")
-
-  with tab2:
-    st.subheader("নতুন একাউন্ট রেজিস্ট্রেশন")
-    s_user = st.text_input("নতুন ইউজারনেম দিন", key="s_user")
-    s_pass = st.text_input("নতুন পাসওয়ার্ড দিন", type="password", key="s_pass")
-    if st.button("রেজিস্ট্রেশন সম্পন্ন করুন", use_container_width=True):
-      if s_user and s_pass:
-        if s_user in st.session_state.users:
-          st.warning("এই ইউজারনেমটি আগেই ব্যবহার করা হয়েছে!")
-        else:
-          st.session_state.users[s_user] = s_pass
+    with auth_tab1:
+      l_user = st.text_input("ইউজারনেম", key="l_user")
+      l_pass = st.text_input("পাসওয়ার্ড", type="password", key="l_pass")
+      if st.button("লগইন", use_container_width=True):
+        if (
+            l_user in st.session_state.users
+            and st.session_state.users[l_user] == l_pass
+        ):
           st.session_state.logged_in = True
-          st.session_state.current_user = s_user
-          st.session_state.chat_histories[s_user] = []
-          st.success("একাউন্ট তৈরি এবং লগইন সফল হয়েছে!")
-          time.sleep(1)
+          st.session_state.current_user = l_user
+          if l_user not in st.session_state.chat_histories:
+            st.session_state.chat_histories[l_user] = []
+          st.success("সফলভাবে লগইন হয়েছে!")
+          time.sleep(0.8)
           st.rerun()
-      else:
-        st.error("সবগুলো ঘর পূরণ করুন!")
+        else:
+          st.error("ভুল ইউজারনেম বা পাসওয়ার্ড!")
 
-  # ডিফল্ট টেস্ট ইনফো দেখানোর জন্য
-  st.markdown("---")
-  st.info(
-      "💡 **টেস্ট করার জন্য:** ইউজারনেম হিসাবে `mushfik` এবং পাসওয়ার্ড হিসাবে"
-      " `1234` দিয়ে দ্রুত লগইন করতে পারেন।"
+    with auth_tab2:
+      s_user = st.text_input("নতুন ইউজারনেম", key="s_user")
+      s_pass = st.text_input("নতুন পাসওয়ার্ড", type="password", key="s_pass")
+      if st.button("একাউন্ট তৈরি", use_container_width=True):
+        if s_user and s_pass:
+          if s_user in st.session_state.users:
+            st.warning("এই নাম আগেই আছে!")
+          else:
+            st.session_state.users[s_user] = s_pass
+            st.session_state.logged_in = True
+            st.session_state.current_user = s_user
+            st.session_state.chat_histories[s_user] = []
+            st.success("একাউন্ট তৈরি ও লগইন সফল!")
+            time.sleep(0.8)
+            st.rerun()
+        else:
+          st.error("সবগুলো ঘর পূরণ করুন!")
+  st.sidebar.info(
+      "💡 আপনি বর্তমানে **Guest** হিসেবে ব্যবহার করছেন। হিস্ট্রি সেভ রাখতে"
+      " লগইন করতে পারেন।"
   )
-  st.stop()  # লগইন না হওয়া পর্যন্ত কোড এখানে থেমে থাকবে
-
-
-# ----------------- মূল অ্যাপ ইন্টারফেস (লগইন হওয়ার পর) -----------------
-st.title("🩺 MUSHFIK'S HEALTH ASSISTANT AI")
-st.sidebar.success(f"👤 লগইন আছেন: **{st.session_state.current_user}**")
-
-if st.sidebar.button("🚪 লগআউট (Logout)", use_container_width=True):
-  st.session_state.logged_in = False
-  st.session_state.current_user = ""
-  st.rerun()
+else:
+  st.sidebar.success(
+      f"активных: **{st.session_state.current_user}** (লগইন করা)"
+  )
+  if st.sidebar.button("🚪 লগআউট", use_container_width=True):
+    st.session_state.logged_in = False
+    st.session_state.current_user = "Guest"
+    st.rerun()
 
 st.sidebar.markdown("---")
 st.sidebar.header("⚙️ Settings & Controls")
 
-# বর্তমান ইউজারের চ্যাট হিস্ট্রি ফেচ করা
+# ----------------- মূল অ্যাপ ইন্টারফেস -----------------
+st.title("🩺 MUSHFIK'S HEALTH ASSISTANT AI")
+st.write(
+    "নবম শ্রেণীর বিজ্ঞান মেলার জন্য তৈরি একটি উদ্ভাবনী স্বাস্থ্যসেবা এআই প্রজেক্ট।"
+)
+
+# বর্তমান ইউজারের চ্যাট হিস্ট্রি নিশ্চিত করা
 current_user = st.session_state.current_user
 if current_user not in st.session_state.chat_histories:
   st.session_state.chat_histories[current_user] = []
@@ -213,16 +209,16 @@ if arduino_connected:
     ser.close()
 else:
   st.warning(
-      f"⚠️ সেন্সর পাওয়া যায়নি। ({current_user}-এর চ্যাট হিস্ট্রি মোড সক্রিয়)"
+      f"⚠️ সেন্সর পাওয়া যায়নি। (চ্যাট হিস্ট্রি মোড সক্রিয় - ব্যবহারকারী:"
+      f" {current_user})"
   )
 
-  # পুরোনো চ্যাট হিস্ট্রি স্ক্রিনে রেন্ডার করা
+  # পুরোনো চ্যাট হিস্ট্রি রেন্ডার করা
   for message in st.session_state.chat_histories[current_user]:
     with st.chat_message(message["role"]):
       st.markdown(message["content"])
 
   if prompt := st.chat_input("আপনার স্বাস্থ্যগত সমস্যা বাংলায় লিখুন..."):
-    # ইউজারের মেসেজ যোগ করা
     with st.chat_message("user"):
       st.markdown(prompt)
     st.session_state.chat_histories[current_user].append(
@@ -234,7 +230,6 @@ else:
           f"রোগীর প্রশ্ন: '{prompt}'। সহানুভূতিশীল ডাক্তারের মতো বিস্তারিত প্রাথমিক স্বাস্থ্য পরামর্শ দিন।"
       )
 
-    # এআই-এর উত্তর যোগ করা
     with st.chat_message("assistant"):
       st.markdown(response)
       speak_response(response)
