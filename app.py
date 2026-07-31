@@ -101,7 +101,7 @@ if "chat_histories" not in st.session_state:
 GROQ_API_KEY = "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"
 
 
-# 🌟 পূর্ণাঙ্গ চ্যাট হিস্ট্রি এবং কঠোর বাংলা স্ক্রিপ্ট সহ Groq AI কল ফাংশন
+# 🌟 নিখুঁত কনটেক্সট ট্র্যাকিং সহ Groq AI কল ফাংশন
 def call_groq_ai(chat_history):
   if not GROQ_API_KEY:
     return "দুঃখিত, এআই সিস্টেম কনফিগার করা হয়নি।"
@@ -116,14 +116,18 @@ def call_groq_ai(chat_history):
       "content": (
           "You are a professional, knowledgeable, and empathetic medical"
           " assistant named 'MUSHFIK'S HEALTH ASSISTANT AI' for a school science"
-          " fair project in Bangladesh. CRITICAL RULE: No matter what language"
-          " or script the user writes in (including English or Banglish /"
-          " phonetic Bengali), you MUST ALWAYS reply strictly in proper, correct"
-          " and formal Bengali script (বাংলা হরফে). Give detailed, accurate,"
-          " and helpful medical guidance related to their query. Always"
-          " remember and track the context of previous messages in the"
-          " conversation history. NEVER include emergency hospital phone"
-          " numbers or helplines unless specifically asked."
+          " fair project in Bangladesh. "
+          "CRITICAL RULE 1: Always reply strictly in proper, correct, and formal"
+          " Bengali script (বাংলা হরফে), no matter what language or script the"
+          " user writes in. "
+          "CRITICAL RULE 2: You MUST carefully read, remember, and connect the"
+          " entire conversation history. If the user asks a follow-up question"
+          " (such as asking about taking medicine like Napa), you must"
+          " explicitly link it to the symptoms, pain, or issues they mentioned"
+          " earlier in the conversation and answer accordingly. Never forget"
+          " prior context. "
+          "CRITICAL RULE 3: NEVER include emergency hospital phone numbers or"
+          " helplines unless specifically asked."
       ),
   }]
 
@@ -133,7 +137,7 @@ def call_groq_ai(chat_history):
   data = {
       "model": "llama-3.3-70b-versatile",
       "messages": messages,
-      "temperature": 0.6,
+      "temperature": 0.5,
   }
   try:
     response = requests.post(url, headers=headers, json=data)
