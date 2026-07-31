@@ -9,7 +9,7 @@ st.set_page_config(
     page_title="MUSHFIK'S HEALTH ASSISTANT AI", page_icon="🩺", layout="wide"
 )
 
-# 🌟 ওপেনিং অ্যানিমেশন বা স্প্ল্যাশ স্ক্রিন (শুধুমাত্র প্রথমবার লোড হওয়ার সময় দেখাবে)
+# 🌟 ওপেনিং অ্যানিমেশন বা স্প্ল্যাশ স্ক্রিন
 if "loaded" not in st.session_state:
   st.session_state.loaded = False
 
@@ -102,8 +102,8 @@ if "chat_histories" not in st.session_state:
 GROQ_API_KEY = "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"
 
 
-# Groq AI কল ফাংশন
-def call_groq_ai(prompt):
+# 🌟 পূর্ণাঙ্গ চ্যাট হিস্ট্রি সহ Groq AI কল ফাংশন (স্মৃতিশক্তি বজায় রাখার জন্য)
+def call_groq_ai(chat_history):
   if not GROQ_API_KEY:
     return "দুঃখিত, এআই সিস্টেম কনফিগার করা হয়নি।"
   url = "https://api.groq.com/openai/v1/chat/completions"
@@ -111,24 +111,28 @@ def call_groq_ai(prompt):
       "Authorization": f"Bearer {GROQ_API_KEY}",
       "Content-Type": "application/json",
   }
+
+  # সিস্টেম প্রম্পট এবং পূর্ববর্তী সব মেসেজ যুক্ত করা
+  messages = [{
+      "role": "system",
+      "content": (
+          "You are a professional, knowledgeable, and empathetic medical"
+          " assistant named 'MUSHFIK'S HEALTH ASSISTANT AI' for a school science"
+          " fair project in Bangladesh. Answer the user's questions in natural,"
+          " grammatically correct, and polite Bengali. Give detailed, accurate,"
+          " and helpful medical guidance or general information related to"
+          " their query. Always remember and track the context of previous"
+          " messages in the conversation history. NEVER include emergency"
+          " hospital phone numbers or helplines unless specifically asked."
+      ),
+  }]
+
+  for msg in chat_history:
+    messages.append({"role": msg["role"], "content": msg["content"]})
+
   data = {
       "model": "llama-3.3-70b-versatile",
-      "messages": [
-          {
-              "role": "system",
-              "content": (
-                  "You are a professional, knowledgeable, and empathetic"
-                  " medical assistant named 'MUSHFIK'S HEALTH ASSISTANT AI' for a"
-                  " school science fair project in Bangladesh. Answer the user's"
-                  " questions in natural, grammatically correct, and polite"
-                  " Bengali. Give detailed, accurate, and helpful medical"
-                  " guidance or general information related to their query."
-                  " NEVER include emergency hospital phone numbers or"
-                  " helplines unless specifically asked."
-              ),
-          },
-          {"role": "user", "content": prompt},
-      ],
+      "messages": messages,
       "temperature": 0.6,
   }
   try:
@@ -274,8 +278,13 @@ if arduino_connected:
     st.subheader("🤖 AI স্বাস্থ্য বিশ্লেষণ")
     if st.button("📈 ডেটা এআই দ্বারা বিশ্লেষণ করুন"):
       with st.spinner("AI স্বাস্থ্য রিপোর্ট তৈরি করছে..."):
-        prompt = f"একজন অভিজ্ঞ প্রবীণ ডাক্তারের মতো আচরণ করুন। রোগীর তাপমাত্রা: {temp} °F, মান ২: {heart_rate}, SpO2: {spo2}%। বাংলায় একটি বিস্তারিত স্বাস্থ্য রিপোর্ট তৈরি করুন।"
-        response = call_groq_ai(prompt)
+        # সেন্সর ডেটা বিশ্লেষণের জন্য হিস্ট্রি বা প্রম্পট পাঠানো
+        sensor_prompt = f"রোগীর তাপমাত্রা: {temp} °F, মান ২: {heart_rate}, SpO2: {spo2}%। বাংলায় একটি বিস্তারিত স্বাস্থ্য রিপোর্ট তৈরি করুন।"
+        temp_history = st.session_state.chat_histories[current_user] + [{
+            "role": "user",
+            "content": sensor_prompt,
+        }]
+        response = call_groq_ai(temp_history)
         st.write(response)
         speak_response(response)
   if ser:
@@ -292,6 +301,7 @@ else:
       st.markdown(message["content"])
 
   if prompt := st.chat_input("আপনার স্বাস্থ্যগত সমস্যা বাংলায় লিখুন..."):
+    # ইউজারের মেসেজ স্ক্রিনে দেখানো এবং হিস্টরিতে যোগ করা
     with st.chat_message("user"):
       st.markdown(prompt)
     st.session_state.chat_histories[current_user].append(
@@ -299,9 +309,8 @@ else:
     )
 
     with st.spinner("AI উত্তর ভাবছে..."):
-      response = call_groq_ai(
-          f"রোগীর প্রশ্ন: '{prompt}'। সহানুভূতিশীল ডাক্তারের মতো বিস্তারিত প্রাথমিক স্বাস্থ্য পরামর্শ দিন।"
-      )
+      # এখন পুরো চ্যাট হিস্ট্রি এআই-এর কাছে পাঠানো হচ্ছে যাতে সে আগের সব কথা মনে রাখে
+      response = call_groq_ai(st.session_state.chat_histories[current_user])
 
     with st.chat_message("assistant"):
       st.markdown(response)
