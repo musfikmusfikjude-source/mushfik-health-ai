@@ -1,4 +1,3 @@
 streamlit
 pyserial
 requests
-gTTS
