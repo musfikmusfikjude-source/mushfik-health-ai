@@ -1,7 +1,8 @@
+from gTTS import gTTS
+import os
 import requests
 import serial
 import streamlit as st
-import streamlit.components.v1 as components
 import time
 
 # পৃষ্ঠা কনফিগারেশন
@@ -56,29 +57,15 @@ def call_groq_ai(prompt):
     return f"কানেকশন সমস্যা: {str(e)}"
 
 
-# ব্রাউজারের মাধ্যমে বাংলায় পড়ে শোনানোর ফাংশন (Browser Speech Synthesis)
-def speak_response(text):
-  clean_text = (
-      text.replace("\n", " ")
-      .replace('"', "'")
-      .replace("`", "")
-      .replace("*", "")
-  )
-  html_code = f"""
-    <script>
-        function playSpeech() {{
-            if ('speechSynthesis' in window) {{
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance("{clean_text}");
-                utterance.lang = 'bn-BD';
-                utterance.rate = 0.95;
-                window.speechSynthesis.speak(utterance);
-            }}
-        }}
-        playSpeech();
-    </script>
-    """
-  components.html(html_code, height=0)
+# গুগল ভয়েস দিয়ে বাংলায় অডিও তৈরি করে বাজানোর ফাংশন
+def speak_bengali(text):
+  try:
+    tts = gTTS(text=text, lang="bn", slow=False)
+    audio_file = "temp_audio.mp3"
+    tts.save(audio_file)
+    st.audio(audio_file, format="audio/mp3", autoplay=True)
+  except Exception as e:
+    st.error(f"ভয়েস জেনারেট করতে সমস্যা হচ্ছে: {e}")
 
 
 # সেন্সর বা চ্যাটবট মোড হ্যান্ডলিং
@@ -124,17 +111,15 @@ if arduino_connected:
   with col2:
     st.subheader("🤖 AI স্বাস্থ্য বিশ্লেষণ ও ভয়েস আউটপুট")
     if st.button("📈 ডেটা এআই দ্বারা বিশ্লেষণ করুন"):
-      with st.spinner("AI স্বাস্থ্য রিপোর্ট তৈরি করছে..."):
+      with st.spinner("AI স্বাস্থ্য রিপোর্ট তৈরি করছে এবং ভয়েস প্রস্তুত হচ্ছে..."):
         prompt = f"একজন অভিজ্ঞ প্রবীণ ডাক্তারের মতো আচরণ করুন। রোগীর তাপমাত্রা: {temp} °F, হার্ট রেট: {heart_rate} bpm, SpO2: {spo2}%। বাংলায় একটি বিস্তারিত স্বাস্থ্য রিপোর্ট তৈরি করুন।"
         response = call_groq_ai(prompt)
         st.write(response)
-        speak_response(response)
+        speak_bengali(response)
   if ser:
     ser.close()
 else:
-  st.warning(
-      "⚠️ সেন্সর পাওয়া যায়নি। (AI টেক্সট চ্যাটবট ও ভয়েস রিডিং মোড সক্রিয়)"
-  )
+  st.warning("⚠️ সেন্সর পাওয়া যায়নি। (AI চ্যাটবট ও ভয়েস রিডিং মোড সক্রিয়)")
   if "messages" not in st.session_state:
     st.session_state.messages = []
   for message in st.session_state.messages:
@@ -153,6 +138,6 @@ else:
 
     with st.chat_message("assistant"):
       st.markdown(response)
-      speak_response(response)
+      speak_bengali(response)
 
     st.session_state.messages.append({"role": "assistant", "content": response})
