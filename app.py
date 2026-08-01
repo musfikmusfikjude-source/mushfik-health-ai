@@ -63,7 +63,7 @@ if not st.session_state.loaded:
   st.components.v1.html(splash_html, height=0)
   st.session_state.loaded = True
 
-# 🌟 ১০০% পার্মানেন্ট ডার্ক মোড CSS স্টাইলিং
+# 🌟 ১০০% পার্মানেন্ট ডার্ক মোড এবং মোবাইল রিফ্রেশ বন্ধ করার CSS
 st.markdown(
     """
     <style>
@@ -71,6 +71,7 @@ st.markdown(
         background-color: #0b132b !important;
         color: #f1f5f9 !important;
         font-family: 'Segoe UI', sans-serif;
+        overscroll-behavior-y: none !important; /* ফোনে টানলে রিফ্রেশ হওয়া বন্ধ করবে */
     }
 
     h1, h2, h3, h4, h5, h6, span, p, label {
@@ -258,7 +259,7 @@ if st.sidebar.button(
   st.session_state.chat_histories[current_user] = []
   st.rerun()
 
-# ----------------- মূল অ্যাপ ইন্টারফেস (বর্ণনা ছাড়া) -----------------
+# ----------------- মূল অ্যাপ ইন্টারফেস -----------------
 st.markdown(
     """
     <div style="background: linear-gradient(135deg, #1c2541 0%, #0b132b 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(0, 180, 216, 0.3); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
