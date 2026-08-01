@@ -11,6 +11,13 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# 🌟 Google Search Console Verification Meta Tag
+st.markdown(
+    '<meta name="google-site-verification"'
+    ' content="ak0E1mKookb-aDt05_Bl3uvIE7M6fwtEARkEWPoiOCw" />',
+    unsafe_allow_html=True,
+)
+
 # 🌟 প্রিমিয়াম স্প্ল্যাশ স্ক্রিন
 if "loaded" not in st.session_state:
   st.session_state.loaded = False
@@ -60,25 +67,21 @@ if not st.session_state.loaded:
 st.markdown(
     """
     <style>
-    /* মেইন অ্যাপ এবং ব্যাকগ্রাউন্ড ফোর্সড ডার্ক */
     .stApp, body, html {
         background-color: #0b132b !important;
         color: #f1f5f9 !important;
         font-family: 'Segoe UI', sans-serif;
     }
 
-    /* হেডার ও টেক্সট ডিজাইন */
     h1, h2, h3, h4, h5, h6, span, p, label {
         color: #ffffff !important;
     }
 
-    /* সাইডবার ডিজাইন */
     [data-testid="stSidebar"] {
         background-color: #1c2541 !important;
         border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* প্রিমিয়াম বাটন */
     .stButton>button {
         background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
         color: white;
@@ -95,7 +98,6 @@ st.markdown(
         transform: translateY(-2px);
     }
 
-    /* চ্যাট মেসেজ বক্স গ্লাস ডিজাইন */
     [data-testid="stChatMessage"] {
         background-color: #1c2541 !important;
         border-radius: 15px !important;
@@ -104,7 +106,6 @@ st.markdown(
         box-shadow: 0 6px 20px rgba(0,0,0,0.25);
     }
 
-    /* ইনপুট বক্স ও সিলেক্ট বক্স ডার্ক */
     .stTextInput>div>div>input, .stSelectbox>div>div>div {
         background-color: #1c2541 !important;
         color: white !important;
@@ -112,7 +113,6 @@ st.markdown(
         border: 1px solid rgba(0, 180, 216, 0.3) !important;
     }
     
-    /* কাস্টম কার্ড ডিজাইন */
     .custom-card {
         background: #1c2541;
         padding: 20px;
@@ -194,7 +194,6 @@ st.sidebar.markdown(
 )
 st.sidebar.markdown("---")
 
-# ইউজার অ্যাকাউন্ট সেকশন
 if not st.session_state.logged_in:
   with st.sidebar.expander("🔑 ইউজার লগইন / সাইন-আপ", expanded=False):
     auth_tab1, auth_tab2 = st.tabs(["লগইন", "সাইন-আপ"])
@@ -248,7 +247,6 @@ port = st.sidebar.selectbox(
     "Arduino Port সিলেক্ট করুন", ["COM3", "COM4", "COM5", "COM6", "/dev/ttyUSB0"]
 )
 
-# চ্যাট ক্লিয়ার করার বাটন
 st.sidebar.markdown("---")
 current_user = st.session_state.current_user
 if current_user not in st.session_state.chat_histories:
@@ -260,7 +258,7 @@ if st.sidebar.button(
   st.session_state.chat_histories[current_user] = []
   st.rerun()
 
-# ----------------- মূল অ্যাপ ইন্টারফেস (মডার্ন হেডার) -----------------
+# ----------------- মূল অ্যাপ ইন্টারফেস -----------------
 st.markdown(
     """
     <div style="background: linear-gradient(135deg, #1c2541 0%, #0b132b 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(0, 180, 216, 0.3); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
@@ -273,7 +271,6 @@ st.markdown(
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# সেন্সর কানেকশন চেক
 arduino_connected = False
 ser = None
 try:
@@ -330,13 +327,11 @@ if arduino_connected:
   if ser:
     ser.close()
 else:
-  # 🌟 অ্যাডভান্সড চ্যাট ইন্টারফেস ও কুইক চিপস
   st.markdown(
       "<h3 style='color: #00f5d4;'>💬 এআই চ্যাট অ্যাসিস্ট্যান্ট</h3>",
       unsafe_allow_html=True,
   )
 
-  # কুইক সাজেশন বাটন (Quick Suggestion Chips)
   st.markdown(
       "<p style='color: #94a3b8; font-size: 14px;'>সরাসরি নিচের সমস্যাগুলোতে ক্লিক"
       " করতে পারো:</p>",
@@ -360,12 +355,10 @@ else:
 
   st.markdown("<br>", unsafe_allow_html=True)
 
-  # চ্যাট হিস্ট্রি রেন্ডার করা
   for message in st.session_state.chat_histories[current_user]:
     with st.chat_message(message["role"]):
       st.markdown(message["content"])
 
-  # যদি কুইক বাটন ক্লিক করা হয় অথবা চ্যাট ইনপুট দেওয়া হয়
   prompt = st.chat_input("আপনার স্বাস্থ্যগত সমস্যা বাংলায় বা বাংলিশে লিখুন...")
 
   if quick_prompt:
