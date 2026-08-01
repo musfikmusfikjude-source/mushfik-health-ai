@@ -258,12 +258,11 @@ if st.sidebar.button(
   st.session_state.chat_histories[current_user] = []
   st.rerun()
 
-# ----------------- মূল অ্যাপ ইন্টারফেস -----------------
+# ----------------- মূল অ্যাপ ইন্টারফেস (বর্ণনা ছাড়া) -----------------
 st.markdown(
     """
     <div style="background: linear-gradient(135deg, #1c2541 0%, #0b132b 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(0, 180, 216, 0.3); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
-        <h1 style="color: #00f5d4 !important; font-size: 38px; margin-bottom: 10px;">🩺 MUSHFIK'S HEALTH ASSISTANT AI</h1>
-        <p style="color: #94a3b8; font-size: 18px; margin: 0;">নবম শ্রেণীর বিজ্ঞান মেলার জন্য তৈরি একটি অ্যাডভান্সড এবং ইন্টেলিজেন্ট মেডিকেল এআই প্রজেক্ট।</p>
+        <h1 style="color: #00f5d4 !important; font-size: 38px; margin: 0;">🩺 MUSHFIK'S HEALTH ASSISTANT AI</h1>
     </div>
     """,
     unsafe_allow_html=True,
