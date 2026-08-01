@@ -17,9 +17,7 @@ if not st.session_state.loaded:
     <div id="splash-screen" style="
         position: fixed;
         top: 0; left: 0; width: 100vw; height: 100vh;
-        background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a365d);
-        background-size: 400% 400%;
-        animation: gradientBG 15s ease infinite;
+        background: #0f2027;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -29,23 +27,10 @@ if not st.session_state.loaded:
         font-family: sans-serif;
         transition: opacity 0.8s ease;
     ">
-        <div style="font-size: 60px; animation: pulse 1.2s infinite ease-in-out;">🩺</div>
+        <div style="font-size: 60px;">🩺</div>
         <h1 style="margin-top: 20px; letter-spacing: 2px; color: #ffffff; text-align: center;">MUSHFIK'S HEALTH ASSISTANT AI</h1>
         <p style="color: #00ffcc; font-size: 18px; margin-top: 10px; font-weight: bold;">সিস্টেম লোড হচ্ছে, একটু অপেক্ষা করুন...</p>
     </div>
-    
-    <style>
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    @keyframes pulse {
-        0% { transform: scale(0.9); opacity: 0.7; }
-        50% { transform: scale(1.15); opacity: 1; }
-        100% { transform: scale(0.9); opacity: 0.7; }
-    }
-    </style>
     
     <script>
         setTimeout(function() {
@@ -59,34 +44,6 @@ if not st.session_state.loaded:
     """
   st.components.v1.html(splash_html, height=0)
   st.session_state.loaded = True
-
-# 🌟 ডায়নামিক হেলথ ব্যাকগ্রাউন্ড এবং কাস্টম স্টাইল CSS
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1a365d);
-        background-size: 400% 400%;
-        animation: gradientBG 15s ease infinite;
-    }
-    
-    @keyframes gradientBG {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-
-    h1, h2, h3, h4, h5, h6, p, label {
-        color: #ffffff !important;
-    }
-    
-    [data-testid="stSidebar"] {
-        background-color: rgba(15, 32, 39, 0.9) !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 
 # সেশন স্টেট ইনিশিয়ালাইজেশন
 if "users" not in st.session_state:
