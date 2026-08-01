@@ -50,36 +50,35 @@ if not st.session_state.loaded:
                 splash.style.opacity = '0';
                 setTimeout(function() { splash.style.display = 'none'; }, 800);
             }
-        }, 2000);
+        }, 1800);
     </script>
     """
   st.components.v1.html(splash_html, height=0)
   st.session_state.loaded = True
 
-# 🌟 অ্যাডভান্সড মডার্ন CSS স্টাইলিং
+# 🌟 অ্যাডভান্সড মডার্ন কাস্টম CSS (UI উন্নত করার জন্য)
 st.markdown(
     """
     <style>
-    /* মেইন অ্যাপ ব্যাকগ্রাউন্ড ও ফন্ট */
     .stApp {
         background-color: #0b132b;
-        color: #e2e8f0;
+        color: #f1f5f9;
         font-family: 'Segoe UI', sans-serif;
     }
 
-    /* টাইটেল হেডার স্টাইল */
+    /* হেডার ও টেক্সট ডিজাইন */
     h1, h2, h3 {
-        color: #f8fafc !important;
+        color: #ffffff !important;
         font-weight: 700 !important;
     }
 
     /* সাইডবার ডিজাইন */
     [data-testid="stSidebar"] {
         background-color: #1c2541 !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.05);
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* কাস্টম বাটন স্টাইল */
+    /* প্রিমিয়াম বাটন */
     .stButton>button {
         background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
         color: white;
@@ -87,7 +86,7 @@ st.markdown(
         border: none;
         padding: 10px 20px;
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(0, 180, 216, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
         transition: all 0.3s ease;
     }
     .stButton>button:hover {
@@ -96,30 +95,31 @@ st.markdown(
         transform: translateY(-2px);
     }
 
-    /* চ্যাট মেসেজ বক্স স্টাইল */
+    /* চ্যাট মেসেজ বক্স গ্লাস ডিজাইন */
     [data-testid="stChatMessage"] {
         background-color: #1c2541 !important;
-        border-radius: 14px !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        padding: 18px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        border-radius: 15px !important;
+        border: 1px solid rgba(0, 180, 216, 0.2) !important;
+        padding: 15px !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.25);
     }
 
-    /* ইনপুট বক্স ও সিলেক্ট বক্স কাস্টমাইজেশন */
-    .stTextInput>div>div>input, .stSelectbox>div>div>div {
+    /* ইনপুট বক্স */
+    .stTextInput>div>div>input {
         background-color: #1c2541 !important;
         color: white !important;
-        border-radius: 8px !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(0, 180, 216, 0.3) !important;
     }
     
-    /* মেট্রিক কার্ড লুক */
-    [data-testid="stMetric"] {
+    /* কাস্টম কার্ড ডিজাইন */
+    .custom-card {
         background: #1c2541;
-        padding: 15px;
-        border-radius: 12px;
-        border: 1px solid rgba(0, 180, 216, 0.2);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid rgba(0, 180, 216, 0.25);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        margin-bottom: 20px;
     }
     </style>
     """,
@@ -187,17 +187,22 @@ def call_groq_ai(chat_history):
     return f"কানেকশন সমস্যা: {str(e)}"
 
 
-# ----------------- সাইডবারের লগইন / সাইন-আপ প্যানেল -----------------
-st.sidebar.title("👤 ইউজার অ্যাকাউন্ট")
+# ----------------- সাইডবারের আধুনিক প্যানেল -----------------
+st.sidebar.markdown(
+    "<h2 style='text-align: center; color: #00f5d4;'>🩺 কন্ট্রোল প্যানেল</h2>",
+    unsafe_allow_html=True,
+)
+st.sidebar.markdown("---")
 
+# ইউজার অ্যাকাউন্ট সেকশন
 if not st.session_state.logged_in:
-  with st.sidebar.expander("🔑 লগইন বা সাইন-আপ করুন", expanded=False):
+  with st.sidebar.expander("🔑 ইউজার লগইন / সাইন-আপ", expanded=False):
     auth_tab1, auth_tab2 = st.tabs(["লগইন", "সাইন-আপ"])
 
     with auth_tab1:
       l_user = st.text_input("ইউজারনেম", key="l_user")
       l_pass = st.text_input("পাসওয়ার্ড", type="password", key="l_pass")
-      if st.button("লগইন", use_container_width=True):
+      if st.button("লগইন করুন", use_container_width=True):
         if (
             l_user in st.session_state.users
             and st.session_state.users[l_user] == l_pass
@@ -215,7 +220,7 @@ if not st.session_state.logged_in:
     with auth_tab2:
       s_user = st.text_input("নতুন ইউজারনেম", key="s_user")
       s_pass = st.text_input("নতুন পাসওয়ার্ড", type="password", key="s_pass")
-      if st.button("একাউন্ট তৈরি", use_container_width=True):
+      if st.button("একাউন্ট তৈরি করুন", use_container_width=True):
         if s_user and s_pass:
           if s_user in st.session_state.users:
             st.warning("এই নাম আগেই আছে!")
@@ -224,12 +229,12 @@ if not st.session_state.logged_in:
             st.session_state.logged_in = True
             st.session_state.current_user = s_user
             st.session_state.chat_histories[s_user] = []
-            st.success("একাউন্ট তৈরি ও লগইন সফল!")
+            st.success("একাউন্ট তৈরি সফল!")
             time.sleep(0.8)
             st.rerun()
         else:
           st.error("সবগুলো ঘর পূরণ করুন!")
-  st.sidebar.info("💡 বর্তমানে Guest মোডে আছেন। হিস্ট্রি সেভ রাখতে লগইন করুন।")
+  st.sidebar.info("💡 বর্তমান মোড: **Guest**")
 else:
   st.sidebar.success(f"👤 ইউজার: **{st.session_state.current_user}**")
   if st.sidebar.button("🚪 লগআউট", use_container_width=True):
@@ -238,30 +243,39 @@ else:
     st.rerun()
 
 st.sidebar.markdown("---")
-st.sidebar.header("⚙️ Settings & Controls")
-
-# ----------------- মূল অ্যাপ ইন্টারফেস -----------------
-st.title("🩺 MUSHFIK'S HEALTH ASSISTANT AI")
-st.markdown(
-    "<p style='color: #94a3b8; font-size: 16px;'>নবম শ্রেণীর বিজ্ঞান"
-    " মেলার জন্য তৈরি একটি উদ্ভাবনী এবং অ্যাডভান্সড স্বাস্থ্যসেবা এআই"
-    " প্রজেক্ট।</p>",
-    unsafe_allow_html=True,
+st.sidebar.subheader("⚙️ হার্ডওয়্যার ও সেটিংস")
+port = st.sidebar.selectbox(
+    "Arduino Port সিলেক্ট করুন", ["COM3", "COM4", "COM5", "COM6", "/dev/ttyUSB0"]
 )
-st.markdown("---")
 
-# বর্তমান ইউজারের চ্যাট হিস্ট্রি নিশ্চিত করা
+# চ্যাট ক্লিয়ার করার বাটন
+st.sidebar.markdown("---")
 current_user = st.session_state.current_user
 if current_user not in st.session_state.chat_histories:
   st.session_state.chat_histories[current_user] = []
 
-# সেন্সর বা চ্যাটবট মোড হ্যান্ডলিং
-port = st.sidebar.selectbox(
-    "Arduino Port সিলেক্ট করুন", ["COM3", "COM4", "COM5", "COM6", "/dev/ttyUSB0"]
+if st.sidebar.button(
+    "🗑️ বর্তমান চ্যাট মুছুন (Clear Chat)", use_container_width=True
+):
+  st.session_state.chat_histories[current_user] = []
+  st.rerun()
+
+# ----------------- মূল অ্যাপ ইন্টারফেস (মডার্ন হেডার) -----------------
+st.markdown(
+    """
+    <div style="background: linear-gradient(135deg, #1c2541 0%, #0b132b 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(0, 180, 216, 0.3); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+        <h1 style="color: #00f5d4 !important; font-size: 38px; margin-bottom: 10px;">🩺 MUSHFIK'S HEALTH ASSISTANT AI</h1>
+        <p style="color: #94a3b8; font-size: 18px; margin: 0;">নবম শ্রেণীর বিজ্ঞান মেলার জন্য তৈরি একটি অ্যাডভান্সড এবং ইন্টেলিজেন্ট মেডিকেল এআই প্রজেক্ট।</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# সেন্সর কানেকশন চেক
 arduino_connected = False
 ser = None
-
 try:
   ser = serial.Serial(port, 9600, timeout=1)
   arduino_connected = True
@@ -269,14 +283,15 @@ except:
   arduino_connected = False
 
 if arduino_connected:
-  st.success("✅ সেন্সর বুথ সংযুক্ত আছে! (সেন্সর মোড সক্রিয়)")
+  st.success("✅ সেন্সর বুথ সফলভাবে সংযুক্ত আছে!")
   col1, col2 = st.columns([1, 2], gap="large")
   with col1:
+    st.markdown("<div class='custom-card'>", unsafe_allow_html=True)
     st.subheader("📊 লাইভ সেন্সর ডেটা")
-    demo_mode = st.checkbox("ডেমো বা টেস্ট ডেটা ব্যবহার করুন", value=True)
+    demo_mode = st.checkbox("ডেমো টেস্ট মোড", value=True)
     if demo_mode:
       temp = st.slider("শরীরের তাপমাত্রা (°F)", 96.0, 105.0, 98.6, 0.1)
-      heart_rate = st.slider("হৃদস্পন্দন / আর্দ্রতা", 50, 150, 75)
+      heart_rate = st.slider("হৃদস্পন্দন / হার্ট রেট", 50, 150, 75)
       spo2 = st.slider("অক্সিজেন মাত্রা (SpO2 %)", 80, 100, 98)
     else:
       temp, heart_rate, spo2 = 98.6, 75, 98
@@ -295,9 +310,14 @@ if arduino_connected:
       st.metric(label="🌡️ তাপমাত্রা", value=f"{temp} °F")
       st.metric(label="💓 হার্ট রেট", value=f"{heart_rate}")
       st.metric(label="🩸 SpO2", value=f"{spo2} %")
+    st.markdown("</div>", unsafe_allow_html=True)
+
   with col2:
-    st.subheader("🤖 AI স্বাস্থ্য বিশ্লেষণ ড্যাশবোর্ড")
-    if st.button("📈 সেন্সর ডেটা এআই দ্বারা বিশ্লেষণ করুন"):
+    st.markdown("<div class='custom-card'>", unsafe_allow_html=True)
+    st.subheader("🤖 এআই স্বাস্থ্য বিশ্লেষণ রিপোর্ট")
+    if st.button(
+        "📈 সেন্সর ডেটা এআই দ্বারা বিশ্লেষণ করুন", use_container_width=True
+    ):
       with st.spinner("AI স্বাস্থ্য রিপোর্ট তৈরি করছে..."):
         sensor_prompt = f"রোগীর তাপমাত্রা: {temp} °F, হার্ট রেট: {heart_rate}, SpO2: {spo2}%। বাংলায় একটি বিস্তারিত স্বাস্থ্য রিপোর্ট তৈরি করুন।"
         temp_history = st.session_state.chat_histories[current_user] + [{
@@ -306,26 +326,59 @@ if arduino_connected:
         }]
         response = call_groq_ai(temp_history)
         st.markdown(response)
+    st.markdown("</div>", unsafe_allow_html=True)
   if ser:
     ser.close()
 else:
-  st.info(
-      f"💬 চ্যাট অ্যাসিস্ট্যান্ট মোড সক্রিয় (ব্যবহারকারী: {current_user})"
+  # 🌟 অ্যাডভান্সড চ্যাট ইন্টারফেস ও কুইক চিপস
+  st.markdown(
+      "<h3 style='color: #00f5d4;'>💬 এআই চ্যাট অ্যাসিস্ট্যান্ট</h3>",
+      unsafe_allow_html=True,
   )
 
-  # পুরোনো চ্যাট হিস্ট্রি রেন্ডার করা
+  # কুইক সাজেশন বাটন (Quick Suggestion Chips)
+  st.markdown(
+      "<p style='color: #94a3b8; font-size: 14px;'>সরাসরি নিচের সমস্যাগুলোতে ক্লিক"
+      " করতে পারো:</p>",
+      unsafe_allow_html=True,
+  )
+  q_col1, q_col2, q_col3, q_col4 = st.columns(4)
+
+  quick_prompt = None
+  with q_col1:
+    if st.button("🦵 পায়ে ব্যথা", use_container_width=True):
+      quick_prompt = "আমার পায়ে প্রচণ্ড ব্যথা করছে, কী করব?"
+  with q_col2:
+    if st.button("🤒 জ্বর ও ঠান্ডা", use_container_width=True):
+      quick_prompt = "আমার গায়ে জ্বর ও ঠান্ডা লাগার ভাব আছে, করণীয় কী?"
+  with q_col3:
+    if st.button("🤕 মাথা ব্যথা", use_container_width=True):
+      quick_prompt = "আমার মাথা ব্যথা করছে, এখন কি করা উচিত?"
+  with q_col4:
+    if st.button("💊 নাপা খাওয়া যাবে?", use_container_width=True):
+      quick_prompt = "আমার কি এখন নাপা খাওয়া উচিত?"
+
+  st.markdown("<br>", unsafe_allow_html=True)
+
+  # চ্যাট হিস্ট্রি রেন্ডার করা
   for message in st.session_state.chat_histories[current_user]:
     with st.chat_message(message["role"]):
       st.markdown(message["content"])
 
-  if prompt := st.chat_input("আপনার স্বাস্থ্যগত সমস্যা বাংলায় বা বাংলিশে লিখুন..."):
+  # যদি কুইক বাটন ক্লিক করা হয় অথবা চ্যাট ইনপুট দেওয়া হয়
+  prompt = st.chat_input("আপনার স্বাস্থ্যগত সমস্যা বাংলায় বা বাংলিশে লিখুন...")
+
+  if quick_prompt:
+    prompt = quick_prompt
+
+  if prompt:
     with st.chat_message("user"):
       st.markdown(prompt)
     st.session_state.chat_histories[current_user].append(
         {"role": "user", "content": prompt}
     )
 
-    with st.spinner("AI উত্তর ভাবছে..."):
+    with st.spinner("AI উত্তর তৈরি করছে..."):
       response = call_groq_ai(st.session_state.chat_histories[current_user])
 
     with st.chat_message("assistant"):
@@ -334,3 +387,5 @@ else:
     st.session_state.chat_histories[current_user].append(
         {"role": "assistant", "content": response}
     )
+    if quick_prompt:
+      st.rerun()
