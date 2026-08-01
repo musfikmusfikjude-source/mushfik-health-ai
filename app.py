@@ -3,7 +3,7 @@ import serial
 import streamlit as st
 import time
 
-# পৃষ্ঠা কনফিগারেশন
+# পৃষ্ঠা কনফিগারেশন (পার্মানেন্ট ডার্ক থিম নিশ্চিত করা)
 st.set_page_config(
     page_title="MUSHFIK'S HEALTH ASSISTANT AI",
     page_icon="🩺",
@@ -32,7 +32,7 @@ if not st.session_state.loaded:
     ">
         <div style="font-size: 70px; animation: pulse 1.5s infinite ease-in-out;">🩺</div>
         <h1 style="margin-top: 20px; letter-spacing: 2px; color: #00f5d4; font-weight: 700;">MUSHFIK'S HEALTH ASSISTANT AI</h1>
-        <p style="color: #94a3b8; font-size: 16px; margin-top: 10px; font-weight: 500;">অ্যাডভান্সড মেডিক্যাল সিস্টেম লোড হচ্ছে...</p>
+        <p style="color: #94a3b8; font-size: 16px; margin-top: 10px; font-weight: 500;">ডার্ক মোড সিস্টেম লোড হচ্ছে...</p>
     </div>
     
     <style>
@@ -56,20 +56,20 @@ if not st.session_state.loaded:
   st.components.v1.html(splash_html, height=0)
   st.session_state.loaded = True
 
-# 🌟 অ্যাডভান্সড মডার্ন কাস্টম CSS (UI উন্নত করার জন্য)
+# 🌟 ১০০% পার্মানেন্ট ডার্ক মোড CSS স্টাইলিং
 st.markdown(
     """
     <style>
-    .stApp {
-        background-color: #0b132b;
-        color: #f1f5f9;
+    /* মেইন অ্যাপ এবং ব্যাকগ্রাউন্ড ফোর্সড ডার্ক */
+    .stApp, body, html {
+        background-color: #0b132b !important;
+        color: #f1f5f9 !important;
         font-family: 'Segoe UI', sans-serif;
     }
 
     /* হেডার ও টেক্সট ডিজাইন */
-    h1, h2, h3 {
+    h1, h2, h3, h4, h5, h6, span, p, label {
         color: #ffffff !important;
-        font-weight: 700 !important;
     }
 
     /* সাইডবার ডিজাইন */
@@ -104,8 +104,8 @@ st.markdown(
         box-shadow: 0 6px 20px rgba(0,0,0,0.25);
     }
 
-    /* ইনপুট বক্স */
-    .stTextInput>div>div>input {
+    /* ইনপুট বক্স ও সিলেক্ট বক্স ডার্ক */
+    .stTextInput>div>div>input, .stSelectbox>div>div>div {
         background-color: #1c2541 !important;
         color: white !important;
         border-radius: 10px !important;
