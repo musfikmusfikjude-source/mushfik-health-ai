@@ -71,7 +71,7 @@ st.markdown(
         background-color: #0b132b !important;
         color: #f1f5f9 !important;
         font-family: 'Segoe UI', sans-serif;
-        overscroll-behavior-y: none !important;
+        overscroll-behavior-y: none !important; /* ফোনে টানলে রিফ্রেশ হওয়া বন্ধ করবে */
     }
 
     h1, h2, h3, h4, h5, h6, span, p, label {
@@ -140,22 +140,8 @@ if "chat_histories" not in st.session_state:
 GROQ_API_KEY = "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"
 
 
-# 🌟 অটোমেটিক লোকেশন ডিটেকশন ফাংশন
-def get_auto_location():
-  try:
-    response = requests.get("https://ipapi.co/json/", timeout=3)
-    if response.status_code == 200:
-      data = response.json()
-      city = data.get("city", "Dhaka")
-      region = data.get("region", "Dhaka")
-      return f"{city}, {region}, বাংলাদেশ"
-  except:
-    pass
-  return "ঢাকা, বাংলাদেশ"
-
-
-# 🌟 নিখুঁত কনটেক্সট ট্র্যাকিং ও অটো-লোকেশন সহ Groq AI কল ফাংশন
-def call_groq_ai(chat_history, user_location):
+# 🌟 নিখুঁত কনটেক্সট ট্র্যাকিং সহ Groq AI কল ফাংশন
+def call_groq_ai(chat_history):
   if not GROQ_API_KEY:
     return "দুঃখিত, এআই সিস্টেম কনফিগার করা হয়নি।"
   url = "https://api.groq.com/openai/v1/chat/completions"
@@ -164,28 +150,25 @@ def call_groq_ai(chat_history, user_location):
       "Content-Type": "application/json",
   }
 
-  system_content = (
-      "You are a professional, knowledgeable, and empathetic medical"
-      " assistant named 'MUSHFIK'S HEALTH ASSISTANT AI' for a school science"
-      " fair project in Bangladesh. "
-      f"The user's automatically detected current location/area is: {user_location}."
-      " "
-      "CRITICAL RULE 1: Always reply strictly in proper, correct, and formal"
-      " Bengali script (বাংলা হরফে), no matter what language or script the"
-      " user writes in (including Banglish). "
-      "CRITICAL RULE 2: You MUST carefully read, remember, and connect the"
-      " entire conversation history. If the user asks a follow-up question"
-      " (such as asking about taking medicine like Napa or asking about nearby"
-      " hospitals), you must explicitly link it to their symptoms, issues, or"
-      f" their detected location ({user_location}) and answer accordingly. "
-      "CRITICAL RULE 3: When the user asks about nearby hospitals, clinics, or"
-      " medical help, recommend prominent and reliable hospitals or medical"
-      " facilities in or near "
-      + user_location
-      + "."
-  )
-
-  messages = [{"role": "system", "content": system_content}]
+  messages = [{
+      "role": "system",
+      "content": (
+          "You are a professional, knowledgeable, and empathetic medical"
+          " assistant named 'MUSHFIK'S HEALTH ASSISTANT AI' for a school science"
+          " fair project in Bangladesh. "
+          "CRITICAL RULE 1: Always reply strictly in proper, correct, and formal"
+          " Bengali script (বাংলা হরফে), no matter what language or script the"
+          " user writes in (including Banglish). "
+          "CRITICAL RULE 2: You MUST carefully read, remember, and connect the"
+          " entire conversation history. If the user asks a follow-up question"
+          " (such as asking about taking medicine like Napa), you must"
+          " explicitly link it to the symptoms, pain, or issues they mentioned"
+          " earlier in the conversation and answer accordingly. Never forget"
+          " prior context. "
+          "CRITICAL RULE 3: NEVER include emergency hospital phone numbers or"
+          " helplines unless specifically asked."
+      ),
+  }]
 
   for msg in chat_history:
     messages.append({"role": msg["role"], "content": msg["content"]})
@@ -258,11 +241,6 @@ else:
     st.session_state.logged_in = False
     st.session_state.current_user = "Guest"
     st.rerun()
-
-st.sidebar.markdown("---")
-st.sidebar.subheader("📍 লাইভ অটো লোকেশন")
-detected_location = get_auto_location()
-st.sidebar.success(f"🎯 বর্তমান এলাকা: **{detected_location}**")
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("⚙️ হার্ডওয়্যার ও সেটিংস")
@@ -343,7 +321,7 @@ if arduino_connected:
             "role": "user",
             "content": sensor_prompt,
         }]
-        response = call_groq_ai(temp_history, detected_location)
+        response = call_groq_ai(temp_history)
         st.markdown(response)
     st.markdown("</div>", unsafe_allow_html=True)
   if ser:
@@ -356,7 +334,7 @@ else:
 
   st.markdown(
       "<p style='color: #94a3b8; font-size: 14px;'>সরাসরি নিচের সমস্যাগুলোতে ক্লিক"
-      " করতে পারো অথবা হাসপাতালের বিষয়ে জিজ্ঞেস করতে পারো:</p>",
+      " করতে পারো:</p>",
       unsafe_allow_html=True,
   )
   q_col1, q_col2, q_col3, q_col4 = st.columns(4)
@@ -366,8 +344,8 @@ else:
     if st.button("🦵 পায়ে ব্যথা", use_container_width=True):
       quick_prompt = "আমার পায়ে প্রচণ্ড ব্যথা করছে, কী করব?"
   with q_col2:
-    if st.button("🏥 কাছের হাসপাতাল", use_container_width=True):
-      quick_prompt = "আমার এলাকার আশেপাশে ভালো হাসপাতালগুলো কোথায় আছে?"
+    if st.button("🤒 জ্বর ও ঠান্ডা", use_container_width=True):
+      quick_prompt = "আমার গায়ে জ্বর ও ঠান্ডা লাগার ভাব আছে, করণীয় কী?"
   with q_col3:
     if st.button("🤕 মাথা ব্যথা", use_container_width=True):
       quick_prompt = "আমার মাথা ব্যথা করছে, এখন কি করা উচিত?"
@@ -394,9 +372,7 @@ else:
     )
 
     with st.spinner("AI উত্তর তৈরি করছে..."):
-      response = call_groq_ai(
-          st.session_state.chat_histories[current_user], detected_location
-      )
+      response = call_groq_ai(st.session_state.chat_histories[current_user])
 
     with st.chat_message("assistant"):
       st.markdown(response)
