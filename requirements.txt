@@ -1,4 +1,4 @@
 streamlit
-opencv-python-headless
 requests
 pyserial
+opencv-python-headless
