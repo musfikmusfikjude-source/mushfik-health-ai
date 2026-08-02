@@ -1,3 +1,7 @@
 streamlit
-pyserial
+streamlit-webrtc
+mediapipe
+opencv-python
+av
 requests
+pyserial
