@@ -1,10 +1,7 @@
-import av
 import cv2
-import mediapipe as mp
 import requests
 import serial
 import streamlit as st
-from streamlit_webrtc import WebRtcMode, webrtc_streamer
 
 # পৃষ্ঠা কনফিগারেশন
 st.set_page_config(
@@ -29,7 +26,7 @@ if not st.session_state.loaded:
     ">
         <div style="font-size: 70px; animation: pulse 1.5s infinite ease-in-out;">🩺</div>
         <h1 style="margin-top: 20px; letter-spacing: 2px; color: #00f5d4; font-weight: 700;">MUSHFIK'S HEALTH ASSISTANT AI</h1>
-        <p style="color: #94a3b8; font-size: 16px; margin-top: 10px; font-weight: 500;">রিয়েল-টাইম হ্যান্ড ট্র্যাকিং সিস্টেম লোড হচ্ছে...</p>
+        <p style="color: #94a3b8; font-size: 16px; margin-top: 10px; font-weight: 500;">সিস্টেম লোড হচ্ছে...</p>
     </div>
     
     <style>
@@ -61,7 +58,6 @@ st.markdown(
         background-color: #0b132b !important;
         color: #f1f5f9 !important;
         font-family: 'Segoe UI', sans-serif;
-        overscroll-behavior-y: none !important;
     }
     h1, h2, h3, h4, h5, h6, span, p, label {
         color: #ffffff !important;
@@ -139,7 +135,7 @@ def call_groq_ai(chat_history):
           "You are a professional medical assistant named 'MUSHFIK'S HEALTH"
           " ASSISTANT AI' for a science fair project. Reply strictly in proper"
           " Bengali script (বাংলা হরফে). The user is communicating via"
-          " real-time hand sign language."
+          " sign language and assistant tools."
       ),
   }]
   for msg in chat_history:
@@ -198,7 +194,7 @@ if st.session_state.app_mode is None:
             <div class="mode-box" style="border-color: #00b4d8;">
                 <div style="font-size: 60px;">🤟</div>
                 <h2>সাইন ল্যাঙ্গুয়েজ (ইশারা ভাষা)</h2>
-                <p style="color: #94a3b8;">রিয়েল-টাইম হ্যান্ড ট্র্যাকিং ক্যামেরা ও শেখার ইন্টারফেস।</p>
+                <p style="color: #94a3b8;">ক্যামেরা ক্যাপচার, ইশারা অনুবাদ ও শেখার ইন্টারফেস।</p>
             </div>
             """,
         unsafe_allow_html=True,
@@ -258,7 +254,7 @@ elif st.session_state.app_mode == "normal":
     )
 
 # ==========================================
-# 🌟 ৩. সাইন ল্যাঙ্গুয়েজ ও রিয়েল-টাইম হ্যান্ড ট্র্যাকিং মোড
+# 🌟 ৩. সাইন ল্যাঙ্গুয়েজ ও ক্যামেরা ক্যাপচার মোড
 # ==========================================
 elif st.session_state.app_mode == "sign":
   st.sidebar.markdown(
@@ -277,76 +273,59 @@ elif st.session_state.app_mode == "sign":
       "📖 সাইন ল্যাঙ্গুয়েজ শিখুন (Learn Interface)", use_container_width=True
   ):
     st.session_state.sign_sub_view = "learn"
-  if st.sidebar.button("🖐️ রিয়েল-টাইম হ্যান্ড ট্র্যাকিং ক্যামেরা", use_container_width=True):
+  if st.sidebar.button("📸 ক্যামেরা ইশারা ক্যাপচার", use_container_width=True):
     st.session_state.sign_sub_view = "translator"
 
   if st.session_state.sign_sub_view == "translator":
     st.markdown(
         """
         <div style="background: linear-gradient(135deg, #1c2541 0%, #0b132b 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(0, 180, 216, 0.3); text-align: center;">
-            <h1 style="color: #00f5d4 !important; font-size: 38px; margin: 0;">🖐️ রিয়েল-টাইম হ্যান্ড ট্র্যাকিং ও সাইন অ্যানালাইজার</h1>
-            <p style="color: #94a3b8; font-size: 15px; margin-top: 5px;">ক্যামেরা সরাসরি আপনার হাত স্ক্যান করে ইশারা ট্র্যাক করবে</p>
+            <h1 style="color: #00f5d4 !important; font-size: 38px; margin: 0;">📸 সাইন ল্যাঙ্গুয়েজ ক্যামেরা ও এআই অ্যানালাইজার</h1>
+            <p style="color: #94a3b8; font-size: 15px; margin-top: 5px;">ইশারা বা অঙ্গভঙ্গির ছবি তুলে তাৎক্ষণিকভাবে এআই থেকে চিকিৎসা পরামর্শ নিন</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
     st.markdown("<br>", unsafe_allow_html=True)
 
-
-    # MediaPipe Hand Tracking Processor Class
-    class HandTrackingProcessor:
-
-      def __init__(self):
-        self.mp_hands = mp.solutions.hands
-        self.hands = self.mp_hands.Hands(
-            max_num_hands=1,
-            min_detection_confidence=0.7,
-            min_tracking_confidence=0.7,
-        )
-        self.mp_draw = mp.solutions.drawing_utils
-
-      def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
-        img = frame.to_ndarray(format="bgr24")
-        img = cv2.flip(img, 1)  # মিরর ইফেক্ট
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        results = self.hands.process(img_rgb)
-
-        if results.multi_hand_landmarks:
-          for hand_landmarks in results.multi_hand_landmarks:
-            self.mp_draw.draw_landmarks(
-                img, hand_landmarks, self.mp_hands.HAND_CONNECTIONS
-            )
-            # এখানে হ্যান্ড ল্যান্ডমার্ক ডেটা প্রসেস করে ইশারা নির্ধারণ করা যায়
-
-        return av.VideoFrame.from_ndarray(img, format="bgr24")
-
-
-    col1, col2 = st.columns([1.2, 1], gap="large")
+    col1, col2 = st.columns([1, 1], gap="large")
 
     with col1:
       st.markdown("<div class='custom-card'>", unsafe_allow_html=True)
-      st.subheader("🔴 লাইভ হ্যান্ড ডিটেকশন ক্যামেরা")
-      # WebRTC লাইভ স্ট্রিম রান করা
-      webrtc_streamer(
-          key="hand-tracking",
-          mode=WebRtcMode.SENDRECV,
-          video_processor_factory=HandTrackingProcessor,
-          media_stream_constraints={"video": True, "audio": False},
-          async_processing=True,
-      )
+      st.subheader("📷 ক্যামেরা স্ন্যাপশট")
+      img_file = st.camera_input("ইশারা বা সাইন ল্যাঙ্গুয়েজ সামনে ধরে ছবি তুলুন")
+
+      if img_file:
+        st.success("ছবি সফলভাবে ক্যাপচার করা হয়েছে!")
+        sign_desc = st.text_input(
+            "ইশারার মূল বিষয় লিখুন (যেমন: মাথা ব্যথা বা পেট ব্যথা)"
+        )
+        if st.button("এআই দিয়ে ইশারা অনুবাদ ও সমাধান নিন"):
+          with st.spinner("বিশ্লেষণ করা হচ্ছে..."):
+            prompt = f"[Sign Language User Image/Input]: {sign_desc} (রোগী কথা বলতে পারেন না, ইশারায় সমস্যা প্রকাশ করেছেন)।"
+            st.session_state.sign_histories.append(
+                {"role": "user", "content": prompt}
+            )
+            response = call_groq_ai(st.session_state.sign_histories)
+            st.session_state.sign_histories.append(
+                {"role": "assistant", "content": response}
+            )
+            st.rerun()
       st.markdown("</div>", unsafe_allow_html=True)
 
     with col2:
       st.markdown("<div class='custom-card'>", unsafe_allow_html=True)
-      st.subheader("💬 এআই স্বাস্থ্য ও ইশারা ফিডব্যাক")
+      st.subheader("💬 কনভারসেশন ও প্রেসক্রিপশন ফিডব্যাক")
 
       for message in st.session_state.sign_histories:
         with st.chat_message(message["role"]):
           st.markdown(message["content"])
 
-      sign_input = st.chat_input("আপনার ইশারার বিবরণ বা স্বাস্থ্য সমস্যা লিখুন...")
-      if sign_input:
-        user_msg = f"[Sign Language User]: {sign_input}"
+      direct_sign_prompt = st.chat_input(
+          "অথবা আপনার সমস্যাটি সরাসরি টাইপ করে জানান..."
+      )
+      if direct_sign_prompt:
+        user_msg = f"[Sign Language User]: {direct_sign_prompt}"
         st.session_state.sign_histories.append(
             {"role": "user", "content": user_msg}
         )
@@ -406,6 +385,6 @@ elif st.session_state.app_mode == "sign":
       )
 
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("⬅️ লাইভ ক্যামেরায় ফিরে যান", use_container_width=False):
+    if st.button("⬅️ ক্যামেরা মোডে ফিরে যান", use_container_width=False):
       st.session_state.sign_sub_view = "translator"
       st.rerun()
