@@ -1,9 +1,11 @@
-import cv2
 import requests
-import serial
 import streamlit as st
+from PIL import Image
+import io
 
-# পৃষ্ঠা কনফিগারেশন
+# ==========================================
+# 🌟 কনফিগারেশন ও স্টাইল
+# ==========================================
 st.set_page_config(
     page_title="MUSHFIK'S HEALTH ASSISTANT AI",
     page_icon="🩺",
@@ -11,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# 🌟 প্রিমিয়াম স্প্ল্যাশ স্ক্রিন
+# 🌟 প্রিমিয়াম স্প্ল্যাশ স্ক্রিন (প্রথম লোডের জন্য)
 if "loaded" not in st.session_state:
   st.session_state.loaded = False
 
@@ -50,7 +52,7 @@ if not st.session_state.loaded:
   st.components.v1.html(splash_html, height=0)
   st.session_state.loaded = True
 
-# 🌟 ১০০% পার্মানেন্ট ডার্ক মোড CSS
+# 🌟 পার্মানেন্ট ডার্ক মোড CSS
 st.markdown(
     """
     <style>
@@ -105,7 +107,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# সেশন স্টেট ইনিশিয়ালাইজেশন
+# ==========================================
+# 🌟 সেশন স্টেট ইনিশিয়ালাইজেশন
+# ==========================================
 if "app_mode" not in st.session_state:
   st.session_state.app_mode = None
 if "sign_sub_view" not in st.session_state:
@@ -117,46 +121,57 @@ if "chat_histories" not in st.session_state:
 if "sign_histories" not in st.session_state:
   st.session_state.sign_histories = []
 
-GROQ_API_KEY = "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"
+# ⚠️ এখানে তোমার Groq API Key বসাও
+GROQ_API_KEY = "PASTE_YOUR_GROQ_API_KEY_HERE"
 
-
-# Groq AI কল ফাংশন
+# ==========================================
+# 🌟 গ্রোথ এআই কল ফাংশন
+# ==========================================
 def call_groq_ai(chat_history):
-  if not GROQ_API_KEY:
-    return "দুঃখিত, এআই সিস্টেম কনফিগার করা হয়নি।"
+  if not GROQ_API_KEY or GROQ_API_KEY == "PASTE_YOUR_GROQ_API_KEY_HERE":
+    return "❌ ত্রুটি: API Key সেট করা হয়নি। অনুগ্রহ করে `app.py`-তে আপনার Groq API Key যুক্ত করুন।"
+  
   url = "https://api.groq.com/openai/v1/chat/completions"
   headers = {
       "Authorization": f"Bearer {GROQ_API_KEY}",
       "Content-Type": "application/json",
   }
+  
+  # সিস্টেম প্রম্পট - যা এআই-কে তার দায়িত্ব শেখায়
   messages = [{
       "role": "system",
       "content": (
-          "You are a professional medical assistant named 'MUSHFIK'S HEALTH"
-          " ASSISTANT AI' for a science fair project. Reply strictly in proper"
-          " Bengali script (বাংলা হরফে). The user is communicating via"
-          " sign language and assistant tools."
+          "You are a professional, empathetic medical assistant named 'MUSHFIK'S HEALTH ASSISTANT AI'. "
+          "Your goal is to assist users, including those who use sign language. "
+          "Strictly reply ONLY in formal Bengali script (বাংলা হরফে). "
+          "If the user provides an image description or asks a question based on sign language, "
+          "interpret their need and provide clear medical advice or guidance in Bengali."
       ),
   }]
+  
+  # চ্যাট হিস্ট্রি যোগ করা
   for msg in chat_history:
     messages.append({"role": msg["role"], "content": msg["content"]})
+  
   data = {
       "model": "llama-3.3-70b-versatile",
       "messages": messages,
-      "temperature": 0.5,
+      "temperature": 0.4, # കുറഞ്ഞ ടെമ്പারেച്ചർ കൂടുതൽ കൃത്യമായ উত্তরের জন্য
+      "max_tokens": 4096
   }
+  
   try:
     response = requests.post(url, headers=headers, json=data)
     if response.status_code == 200:
       return response.json()["choices"][0]["message"]["content"]
     else:
-      return "এআই সার্ভার রেসপন্স করছে না।"
+      return f"❌ এআই সার্ভার ত্রুটি: {response.status_code}"
   except Exception as e:
-    return f"কানেকশন সমস্যা: {str(e)}"
+    return f"❌ কানেকশন সমস্যা: {str(e)}"
 
 
 # ==========================================
-# 🌟 ১. মোড সিলেকশন স্ক্রিন
+# 🌟 ১. মূল মোড সিলেকশন স্ক্রিন
 # ==========================================
 if st.session_state.app_mode is None:
   st.markdown(
@@ -176,15 +191,13 @@ if st.session_state.app_mode is None:
         """
             <div class="mode-box">
                 <div style="font-size: 60px;">🗣️</div>
-                <h2>সাধারণ কথোপকথন ও সেন্সর</h2>
-                <p style="color: #94a3b8;">স্বাভাবিক কথা বা টেক্সট চ্যাট এবং হার্ডওয়্যার সেন্সর ডেটা বিশ্লেষণ মোড।</p>
+                <h2>সাধারণ মোড</h2>
+                <p style="color: #94a3b8;">স্বাভাবিক কথা বা টেক্সট চ্যাট এবং স্বাস্থ্য টিপস।</p>
             </div>
             """,
         unsafe_allow_html=True,
     )
-    if st.button(
-        "সাধারণ মোড শুরু করুন", use_container_width=True, key="btn_normal"
-    ):
+    if st.button("সাধারণ মোড শুরু করুন", use_container_width=True, key="btn_normal"):
       st.session_state.app_mode = "normal"
       st.rerun()
 
@@ -193,198 +206,92 @@ if st.session_state.app_mode is None:
         """
             <div class="mode-box" style="border-color: #00b4d8;">
                 <div style="font-size: 60px;">🤟</div>
-                <h2>সাইন ল্যাঙ্গুয়েজ (ইশারা ভাষা)</h2>
+                <h2>ইশারা ভাষা (সাইন) মোড</h2>
                 <p style="color: #94a3b8;">ক্যামেরা ক্যাপচার, ইশারা অনুবাদ ও শেখার ইন্টারফেস।</p>
             </div>
             """,
         unsafe_allow_html=True,
     )
-    if st.button("সাইন ল্যাঙ্গুয়েজ মোড শুরু করুন", use_container_width=True, key="btn_sign"):
+    if st.button("ইশারা ভাষা মোড শুরু করুন", use_container_width=True, key="btn_sign"):
       st.session_state.app_mode = "sign"
       st.rerun()
 
 # ==========================================
-# 🌟 ২. সাধারণ চ্যাট ও সেন্সর মোড
+# 🌟 ২. সাধারণ চ্যাট মোড
 # ==========================================
 elif st.session_state.app_mode == "normal":
-  st.sidebar.markdown(
-      "<h2 style='text-align: center; color: #00f5d4;'>🩺 কন্ট্রোল প্যানেল</h2>",
-      unsafe_allow_html=True,
-  )
-  st.sidebar.markdown("---")
-  if st.sidebar.button(
-      "🔄 হোম পেজে ফিরে যান (মোড পরিবর্তন)", use_container_width=True
-  ):
-    st.session_state.app_mode = None
-    st.rerun()
+  # সাইডবার
+  with st.sidebar:
+    st.markdown("<h2 style='text-align: center; color: #00f5d4;'>🩺 কন্ট্রোল প্যানেল</h2>", unsafe_allow_html=True)
+    st.markdown("---")
+    if st.button("🔄 হোম পেজে ফিরে যান", use_container_width=True):
+      st.session_state.app_mode = None
+      st.rerun()
+    if st.button("🗑️ চ্যাট হিস্ট্রি মুছুন", use_container_width=True):
+      st.session_state.chat_histories[st.session_state.current_user] = []
+      st.rerun()
 
-  st.sidebar.markdown("---")
-  port = st.sidebar.selectbox(
-      "Arduino Port সিলেক্ট করুন", ["COM3", "COM4", "COM5", "/dev/ttyUSB0"]
-  )
-  current_user = st.session_state.current_user
-
-  st.markdown(
-      """
-        <div style="background: linear-gradient(135deg, #1c2541 0%, #0b132b 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(0, 180, 216, 0.3); text-align: center;">
-            <h1 style="color: #00f5d4 !important; font-size: 38px; margin: 0;">🩺 সাধারণ স্বাস্থ্য সহায়ক মোড</h1>
-        </div>
-        """,
-      unsafe_allow_html=True,
-  )
-  st.markdown("<br>", unsafe_allow_html=True)
-
-  for message in st.session_state.chat_histories[current_user]:
+  # মূল চ্যাট ইন্টারফেস
+  st.markdown("<div style='text-align:center;'><h1>🩺 সাধারণ স্বাস্থ্য সহায়ক মোড</h1></div>", unsafe_allow_html=True)
+  
+  # চ্যাট হিস্ট্রি লোড করা
+  current_history = st.session_state.chat_histories[st.session_state.current_user]
+  for message in current_history:
     with st.chat_message(message["role"]):
       st.markdown(message["content"])
 
-  prompt = st.chat_input("আপনার স্বাস্থ্যগত সমস্যা বাংলায় লিখুন...")
-  if prompt:
+  # ইউজার ইনপুট
+  if prompt := st.chat_input("আপনার স্বাস্থ্য সমস্যা বা প্রশ্ন এখানে লিখুন..."):
+    # ইউজারের মেসেজ সেভ ও ডিসপ্লে
+    st.session_state.chat_histories[st.session_state.current_user].append({"role": "user", "content": prompt})
     with st.chat_message("user"):
       st.markdown(prompt)
-    st.session_state.chat_histories[current_user].append(
-        {"role": "user", "content": prompt}
-    )
-    with st.spinner("AI উত্তর তৈরি করছে..."):
-      response = call_groq_ai(st.session_state.chat_histories[current_user])
+
+    # এআই রেসপন্স
     with st.chat_message("assistant"):
-      st.markdown(response)
-    st.session_state.chat_histories[current_user].append(
-        {"role": "assistant", "content": response}
-    )
+      with st.spinner("⏳ এআই চিন্তা করছে..."):
+        response = call_groq_ai(st.session_state.chat_histories[st.session_state.current_user])
+        st.markdown(response)
+    
+    # এআই-এর মেসেজ সেভ করা
+    st.session_state.chat_histories[st.session_state.current_user].append({"role": "assistant", "content": response})
 
 # ==========================================
-# 🌟 ৩. সাইন ল্যাঙ্গুয়েজ ও ক্যামেরা ক্যাপচার মোড
+# 🌟 ৩. সাইন ল্যাঙ্গুয়েজ (ইশারা) মোড
 # ==========================================
 elif st.session_state.app_mode == "sign":
-  st.sidebar.markdown(
-      "<h2 style='text-align: center; color: #00f5d4;'>🤟 সাইন ল্যাঙ্গুয়েজ প্যানেল</h2>",
-      unsafe_allow_html=True,
-  )
-  st.sidebar.markdown("---")
-  if st.sidebar.button(
-      "🔄 হোম পেজে ফিরে যান (মোড পরিবর্তন)", use_container_width=True
-  ):
-    st.session_state.app_mode = None
-    st.rerun()
+  # সাইডবার
+  with st.sidebar:
+    st.markdown("<h2 style='text-align: center; color: #00f5d4;'>🤟 ইশারা ভাষা প্যানেল</h2>", unsafe_allow_html=True)
+    st.markdown("---")
+    if st.button("🔄 হোম পেজে ফিরে যান", use_container_width=True):
+      st.session_state.app_mode = None
+      st.rerun()
+    st.markdown("---")
+    if st.button("📸 ইশারা অনুবাদক ক্যামেরা", use_container_width=True):
+      st.session_state.sign_sub_view = "translator"
+    if st.button("📖 ইশারা ভাষা শিখুন", use_container_width=True):
+      st.session_state.sign_sub_view = "learn"
 
-  st.sidebar.markdown("---")
-  if st.sidebar.button(
-      "📖 সাইন ল্যাঙ্গুয়েজ শিখুন (Learn Interface)", use_container_width=True
-  ):
-    st.session_state.sign_sub_view = "learn"
-  if st.sidebar.button("📸 ক্যামেরা ইশারা ক্যাপচার", use_container_width=True):
-    st.session_state.sign_sub_view = "translator"
-
+  # 3a. অনুবাদক ইন্টারফেস (ক্যামেরা সহ)
   if st.session_state.sign_sub_view == "translator":
-    st.markdown(
-        """
-        <div style="background: linear-gradient(135deg, #1c2541 0%, #0b132b 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(0, 180, 216, 0.3); text-align: center;">
-            <h1 style="color: #00f5d4 !important; font-size: 38px; margin: 0;">📸 সাইন ল্যাঙ্গুয়েজ ক্যামেরা ও এআই অ্যানালাইজার</h1>
-            <p style="color: #94a3b8; font-size: 15px; margin-top: 5px;">ইশারা বা অঙ্গভঙ্গির ছবি তুলে তাৎক্ষণিকভাবে এআই থেকে চিকিৎসা পরামর্শ নিন</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.markdown("<br>", unsafe_allow_html=True)
-
+    st.markdown("<div style='text-align:center;'><h1>📸 ইশারা ভাষা অনুবাদক ও এআই পরামর্শ</h1></div>", unsafe_allow_html=True)
+    st.write("আপনার ইশারার ছবি তুলুন এবং এআই-কে আপনার সমস্যার কথা লিখে জানান।")
+    
     col1, col2 = st.columns([1, 1], gap="large")
 
     with col1:
       st.markdown("<div class='custom-card'>", unsafe_allow_html=True)
-      st.subheader("📷 ক্যামেরা স্ন্যাপশট")
-      img_file = st.camera_input("ইশারা বা সাইন ল্যাঙ্গুয়েজ সামনে ধরে ছবি তুলুন")
+      st.subheader("📷 ক্যামেরা ক্যাপচার")
+      # Streamlit-এর নিজস্ব নিরাপদ ক্যামেরা ইনপুট
+      img_file_buffer = st.camera_input("আপনার ইশারা সামনে ধরুন")
 
-      if img_file:
-        st.success("ছবি সফলভাবে ক্যাপচার করা হয়েছে!")
-        sign_desc = st.text_input(
-            "ইশারার মূল বিষয় লিখুন (যেমন: মাথা ব্যথা বা পেট ব্যথা)"
-        )
-        if st.button("এআই দিয়ে ইশারা অনুবাদ ও সমাধান নিন"):
-          with st.spinner("বিশ্লেষণ করা হচ্ছে..."):
-            prompt = f"[Sign Language User Image/Input]: {sign_desc} (রোগী কথা বলতে পারেন না, ইশারায় সমস্যা প্রকাশ করেছেন)।"
-            st.session_state.sign_histories.append(
-                {"role": "user", "content": prompt}
-            )
-            response = call_groq_ai(st.session_state.sign_histories)
-            st.session_state.sign_histories.append(
-                {"role": "assistant", "content": response}
-            )
-            st.rerun()
-      st.markdown("</div>", unsafe_allow_html=True)
-
-    with col2:
-      st.markdown("<div class='custom-card'>", unsafe_allow_html=True)
-      st.subheader("💬 কনভারসেশন ও প্রেসক্রিপশন ফিডব্যাক")
-
-      for message in st.session_state.sign_histories:
-        with st.chat_message(message["role"]):
-          st.markdown(message["content"])
-
-      direct_sign_prompt = st.chat_input(
-          "অথবা আপনার সমস্যাটি সরাসরি টাইপ করে জানান..."
-      )
-      if direct_sign_prompt:
-        user_msg = f"[Sign Language User]: {direct_sign_prompt}"
-        st.session_state.sign_histories.append(
-            {"role": "user", "content": user_msg}
-        )
-        with st.spinner("AI উত্তর তৈরি করছে..."):
-          response = call_groq_ai(st.session_state.sign_histories)
-        st.session_state.sign_histories.append(
-            {"role": "assistant", "content": response}
-        )
-        st.rerun()
-      st.markdown("</div>", unsafe_allow_html=True)
-
-  elif st.session_state.sign_sub_view == "learn":
-    st.markdown(
-        """
-        <div style="background: linear-gradient(135deg, #1c2541 0%, #0b132b 100%); padding: 30px; border-radius: 20px; border: 1px solid rgba(0, 180, 216, 0.3); text-align: center;">
-            <h1 style="color: #00f5d4 !important; font-size: 38px; margin: 0;">📖 সাইন ল্যাঙ্গুয়েজ শেখার কর্নার</h1>
-            <p style="color: #94a3b8; font-size: 15px; margin-top: 5px;">প্রাথমিক চিকিৎসা ও স্বাস্থ্য সম্পর্কিত সাধারণ ইশারা ভাষা শিখুন</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns(3)
-    with col1:
-      st.markdown(
-          """
-            <div class='custom-card'>
-                <h3>১. ব্যথা ও অসুস্থতা</h3>
-                <p><b>মাথা ব্যথা:</b> কপালে দুই আঙুল দিয়ে চাপ দিয়ে গোল গোল ঘোরানো।</p>
-                <p><b>পেট ব্যথা:</b> পেটের ওপর হাত রেখে হালকা মাসাজ করা।</p>
-            </div>
-            """,
-          unsafe_allow_html=True,
-      )
-    with col2:
-      st.markdown(
-          """
-            <div class='custom-card'>
-                <h3>২. জরুরি শব্দসমূহ</h3>
-                <p><b>সাহায্য চাই:</b> এক হাতের মুঠি অন্য হাতের ওপর রাখা।</p>
-                <p><b>পানি লাগবে:</b> থুতনির কাছে হাত দিয়ে পানের ইশারা।</p>
-            </div>
-            """,
-          unsafe_allow_html=True,
-      )
-    with col3:
-      st.markdown(
-          """
-            <div class='custom-card'>
-                <h3>৩. অনুভূতি প্রকাশ</h3>
-                <p><b>খুব বেশি কষ্ট:</b> মুখে ব্যথার অভিব্যক্তি ফুটিয়ে তোলা।</p>
-                <p><b>ভালো আছি:</b> বুড়ো আঙুল ওপরের দিকে তোলা (Thumbs Up)।</p>
-            </div>
-            """,
-          unsafe_allow_html=True,
-      )
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("⬅️ ক্যামেরা মোডে ফিরে যান", use_container_width=False):
-      st.session_state.sign_sub_view = "translator"
-      st.rerun()
+      if img_file_buffer is not None:
+        st.success("✅ ছবি সফলভাবে তোলা হয়েছে!")
+        
+        # ছবি প্রসেসিং (ঐচ্ছিক: দেখানোর জন্য)
+        bytes_data = img_file_buffer.getvalue()
+        img = Image.open(io.BytesData(bytes_data))
+        # st.image(img, caption="ক্যাপচার করা ইশারা", use_column_width=True)
+        
+        user_sign_prompt = st.text_
