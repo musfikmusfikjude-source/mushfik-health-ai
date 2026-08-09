@@ -10,7 +10,7 @@ st.title("🩺 MUSHFIK'S HEALTH ASSISTANT AI")
 st.write("নবম শ্রেণীর বিজ্ঞান মেলার জন্য তৈরি একটি উদ্ভাবনী দ্বিমুখী (Dual-Mode) স্বাস্থ্যসেবা প্রজেক্ট।")
 
 st.sidebar.header("⚙️ Settings")
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "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"
 
 def call_groq_ai(prompt):
     if not GROQ_API_KEY: return "দুঃখিত, এআই সিস্টেম কনফিগার করা হয়নি।"
