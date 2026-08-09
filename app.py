@@ -14,13 +14,74 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🩺 MUSHFIK'S HEALTH ASSISTANT AI")
-st.caption("নবম শ্রেণীর বিজ্ঞান মেলার জন্য তৈরি একটি Dual-Mode AI Health Assistant")
 
-st.info(
-    "ℹ️ এটি একটি শিক্ষামূলক স্বাস্থ্য-সহায়ক প্রজেক্ট। "
-    "AI-এর তথ্য সরাসরি চিকিৎসকের বিকল্প নয়।"
-)
+st.markdown("""
+<style>
+[data-testid="stAppViewContainer"]{
+    background:
+      radial-gradient(circle at 10% 0%,rgba(14,165,233,.12),transparent 28%),
+      radial-gradient(circle at 90% 5%,rgba(37,99,235,.10),transparent 25%),
+      #07111f;
+}
+[data-testid="stHeader"]{background:rgba(7,17,31,.72);}
+.main .block-container{max-width:1450px;padding-top:1.8rem;padding-bottom:3rem;}
+section[data-testid="stSidebar"]{
+    background:linear-gradient(180deg,#0b1730 0%,#0a1428 55%,#08111f 100%);
+    border-right:1px solid rgba(148,163,184,.12);
+}
+section[data-testid="stSidebar"]>div{padding-top:1.2rem;}
+section[data-testid="stSidebar"] hr{border-color:rgba(148,163,184,.14);}
+.mushfik-hero{
+    position:relative;overflow:hidden;padding:28px 30px;margin-bottom:18px;
+    border:1px solid rgba(56,189,248,.18);border-radius:24px;
+    background:linear-gradient(135deg,rgba(14,165,233,.16),
+    rgba(37,99,235,.08) 45%,rgba(15,23,42,.55));
+    box-shadow:0 20px 55px rgba(0,0,0,.22);
+}
+.mushfik-hero:after{
+    content:"";position:absolute;width:190px;height:190px;right:-70px;top:-90px;
+    border-radius:50%;background:rgba(56,189,248,.11);
+}
+.hero-kicker{color:#7dd3fc;font-size:.78rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;}
+.hero-title{color:#f8fafc;font-size:clamp(1.8rem,3vw,2.65rem);line-height:1.1;font-weight:800;margin:0;}
+.hero-subtitle{color:#94a3b8;margin-top:10px;font-size:1rem;}
+.status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.status-card{padding:15px 17px;border-radius:16px;background:rgba(15,23,42,.68);border:1px solid rgba(148,163,184,.12);}
+.status-label{color:#94a3b8;font-size:.75rem;margin-bottom:5px;}
+.status-value{color:#e2e8f0;font-weight:700;}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;background:#22c55e;box-shadow:0 0 12px rgba(34,197,94,.7);}
+[data-testid="stMetric"]{padding:16px 18px;border-radius:17px;background:linear-gradient(145deg,rgba(15,23,42,.94),rgba(17,30,53,.74));border:1px solid rgba(56,189,248,.12);}
+[data-testid="stMetricLabel"]{color:#94a3b8 !important;}
+[data-testid="stMetricValue"]{color:#f8fafc !important;font-weight:800;}
+.stButton>button{border-radius:13px;border:1px solid rgba(56,189,248,.20);background:linear-gradient(135deg,#0ea5e9,#2563eb);color:white;font-weight:700;min-height:44px;box-shadow:0 8px 22px rgba(37,99,235,.20);transition:all .18s ease;}
+.stButton>button:hover{transform:translateY(-1px);border-color:rgba(125,211,252,.55);box-shadow:0 12px 28px rgba(37,99,235,.30);}
+[data-baseweb="select"]>div,.stTextInput input,.stTextArea textarea{border-radius:12px !important;}
+[data-testid="stChatMessage"]{border-radius:18px;border:1px solid rgba(148,163,184,.08);margin-bottom:10px;}
+[data-testid="stChatInput"]{border-radius:18px;}
+[data-testid="stAlert"]{border-radius:15px;border:1px solid rgba(148,163,184,.12);}
+.mushfik-footer{text-align:center;color:#64748b;font-size:.78rem;padding:22px 0 8px;}
+@media(max-width:800px){.status-grid{grid-template-columns:1fr;}.mushfik-hero{padding:22px;}.main .block-container{padding-left:1rem;padding-right:1rem;}}
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="mushfik-hero">
+    <div class="hero-kicker">🩺 Intelligent Health Assistant</div>
+    <div class="hero-title">MUSHFIK'S HEALTH ASSISTANT AI</div>
+    <div class="hero-subtitle">
+        স্মার্ট স্বাস্থ্য-তথ্য, context-aware conversation এবং sensor analysis —
+        একটি পরিষ্কার ও আধুনিক interface-এ।
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+<div class="status-grid">
+    <div class="status-card"><div class="status-label">AI ENGINE</div><div class="status-value"><span class="status-dot"></span>Ready</div></div>
+    <div class="status-card"><div class="status-label">CONVERSATION</div><div class="status-value">🧠 Context Aware</div></div>
+    <div class="status-card"><div class="status-label">SENSOR MODE</div><div class="status-value">🔌 Arduino Supported</div></div>
+</div>
+""", unsafe_allow_html=True)
 
 # =========================================================
 # GROQ API KEY
@@ -404,7 +465,12 @@ def ask_chatbot(question):
 # SIDEBAR
 # =========================================================
 
-st.sidebar.header("⚙️ Settings")
+st.sidebar.markdown("""
+<div style="padding:4px 2px 12px;">
+<div style="font-size:1.35rem;font-weight:800;color:#f8fafc;">⚙️ Control Center</div>
+<div style="font-size:.78rem;color:#64748b;margin-top:4px;">MUSHFIK'S HEALTH AI</div>
+</div>
+""", unsafe_allow_html=True)
 
 st.sidebar.subheader("🧠 AI Memory")
 
@@ -672,30 +738,37 @@ else:
 
 
 # =========================================================
-# PROJECT INFORMATION
+# SIDEBAR FEATURES / FOOTER
 # =========================================================
 
 st.sidebar.divider()
-
-st.sidebar.subheader("📚 Project Features")
+st.sidebar.subheader("✨ Features")
 
 st.sidebar.markdown("""
-- 🧠 AI Conversation Memory
-- 💾 SQLite Persistent Memory
-- 🤖 Advanced Bengali AI
-- 🌡️ Temperature Monitoring
-- 💓 Heart Rate Monitoring
-- 🩸 SpO₂ Monitoring
-- 🔌 Arduino Integration
-- 📊 AI Sensor Analysis
-- 💬 Context-Aware Chat
-- ⚠️ Risk-Based Health Guidance
-- 🇧🇩 Bengali Interface
-""")
+<div style="background:rgba(15,23,42,.58);border:1px solid rgba(148,163,184,.10);border-radius:16px;padding:14px;line-height:1.9;color:#cbd5e1;">
+🧠 AI Conversation Memory<br>
+💾 SQLite Persistent Memory<br>
+🤖 Advanced Bengali AI<br>
+🌡️ Temperature Monitoring<br>
+💓 Heart Rate Monitoring<br>
+🩸 SpO₂ Monitoring<br>
+🔌 Arduino Integration<br>
+📊 AI Sensor Analysis<br>
+💬 Context-Aware Chat<br>
+⚠️ Risk-Based Health Guidance<br>
+🇧🇩 Bengali Interface
+</div>
+""", unsafe_allow_html=True)
 
-st.sidebar.divider()
+st.sidebar.markdown("""
+<div style="text-align:center;margin-top:18px;padding:12px;color:#64748b;font-size:.75rem;">
+🩺 <b style="color:#94a3b8;">MUSHFIK'S HEALTH AI</b><br>
+Intelligent • Context-Aware • Bengali
+</div>
+""", unsafe_allow_html=True)
 
-st.sidebar.caption(
-    "MUSHFIK'S HEALTH ASSISTANT AI\n"
-    "Science Fair Project"
-)
+st.markdown("""
+<div class="mushfik-footer">
+MUSHFIK'S HEALTH AI • Smart Health Assistant
+</div>
+""", unsafe_allow_html=True)
