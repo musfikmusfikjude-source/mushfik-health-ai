@@ -1,7 +1,5 @@
 import streamlit as st
 import requests
-import sqlite3
-from datetime import datetime
 import serial
 
 # =========================================================
@@ -97,82 +95,19 @@ except Exception:
     GROQ_API_KEY = ""
 
 # =========================================================
-# DATABASE
+# SESSION MEMORY ONLY
 # =========================================================
-
-DB_FILE = "health_assistant_memory.db"
-
-
-def init_database():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS conversations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            role TEXT NOT NULL,
-            content TEXT NOT NULL,
-            timestamp TEXT NOT NULL
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
-
-def save_message(role, content):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        INSERT INTO conversations (role, content, timestamp)
-        VALUES (?, ?, ?)
-        """,
-        (role, content, datetime.now().isoformat())
-    )
-
-    conn.commit()
-    conn.close()
-
-
-def load_messages():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-
-    cursor.execute(
-        """
-        SELECT role, content
-        FROM conversations
-        ORDER BY id ASC
-        """
-    )
-
-    rows = cursor.fetchall()
-    conn.close()
-
-    return [
-        {"role": role, "content": content}
-        for role, content in rows
-    ]
-
-
-def clear_memory():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM conversations")
-    conn.commit()
-    conn.close()
-
-
-init_database()
+# কোনো SQLite/database history নেই।
+# Chat history শুধু এই browser session-এ থাকবে।
+# Refresh / নতুন session হলে history আর load হবে না।
+# =========================================================
 
 # =========================================================
 # SESSION STATE
 # =========================================================
 
 if "messages" not in st.session_state:
-    st.session_state.messages = load_messages()
+    st.session_state.messages = []
 
 if "arduino" not in st.session_state:
     st.session_state.arduino = None
@@ -474,16 +409,13 @@ st.sidebar.markdown("""
 
 st.sidebar.subheader("🧠 AI Memory")
 
-if st.sidebar.button(
-    "🗑️ Conversation Memory মুছে ফেলুন",
-    use_container_width=True
-):
-    clear_memory()
-    st.session_state.messages = []
-    st.rerun()
-
 st.sidebar.caption(
-    f"বর্তমান Memory: {len(st.session_state.messages)} টি message"
+    f"বর্তমান Session Memory: {len(st.session_state.messages)} টি message"
+)
+
+st.sidebar.info(
+    "🔒 এই chat কোনো database-এ save হয় না। "
+    "Refresh করলে conversation history চলে যাবে।"
 )
 
 st.sidebar.divider()
@@ -666,9 +598,6 @@ if arduino:
                 f"SpO₂ {spo2}%"
             )
 
-            save_message("user", sensor_request)
-            save_message("assistant", report)
-
             st.session_state.messages.append({
                 "role": "user",
                 "content": sensor_request
@@ -712,9 +641,6 @@ else:
         with st.chat_message("user"):
             st.markdown(user_prompt)
 
-        # Save user message
-        save_message("user", user_prompt)
-
         st.session_state.messages.append({
             "role": "user",
             "content": user_prompt
@@ -727,9 +653,6 @@ else:
                 response = ask_chatbot(user_prompt)
 
             st.markdown(response)
-
-        # Save AI response
-        save_message("assistant", response)
 
         st.session_state.messages.append({
             "role": "assistant",
@@ -747,7 +670,7 @@ st.sidebar.subheader("✨ Features")
 st.sidebar.markdown("""
 <div style="background:rgba(15,23,42,.58);border:1px solid rgba(148,163,184,.10);border-radius:16px;padding:14px;line-height:1.9;color:#cbd5e1;">
 🧠 AI Conversation Memory<br>
-💾 SQLite Persistent Memory<br>
+🔒 Private Session Memory<br>
 🤖 Advanced Bengali AI<br>
 🌡️ Temperature Monitoring<br>
 💓 Heart Rate Monitoring<br>
