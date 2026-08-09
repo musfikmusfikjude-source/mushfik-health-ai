@@ -700,4 +700,3 @@ st.sidebar.caption(
     "MUSHFIK'S HEALTH ASSISTANT AI\n"
     "Science Fair Project"
 )
-```
