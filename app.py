@@ -722,7 +722,7 @@ else:
 
         with st.chat_message("assistant"):
             with st.spinner(
-                "🧠 আগের কথোপকথনসহ AI উত্তর তৈরি করছে..."
+                "🧠 MUSHFIK'S HEALTH AI উত্তর তৈরি করছে..."
             ):
                 response = ask_chatbot(user_prompt)
 
